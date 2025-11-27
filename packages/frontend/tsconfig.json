@@ -1,0 +1,19 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./public/bundles",
+    "rootDir": "./",
+    "module": "ESNext",
+    "target": "ES2020",
+    "moduleResolution": "node",
+    "lib": ["DOM", "ES2020"],
+    "jsx": "react-jsx"
+  },
+  "include": [
+    "**/*.ts"
+  ],
+  "exclude": [
+    "../backend/**/*.ts",
+    "../dev/**/*.ts"
+  ]
+}
