@@ -69,10 +69,17 @@
                   <option value="" disabled selected>Select a Group</option>
                 </select>
                 <button class="button small" type="button" id="addGroup">Add Group</button></div>
-            </div>
+                <div class="admin-switch">
+                  <label class="switch">
+                    <input id="includeAdmin" type="checkbox">
+                      <span class="slider"></span>
+                  </label>
+                  <span>Include Admin Group</span>
+                </div>
+              </div>
           </form>
         </div>
-        <button class="button" type="button" id="addWebhook">CREATE</button>
+        <button class="button" type="button" id="addApiKey">CREATE</button>
         <div class="errorBox" id="errorBox">
           <p class="errorTitle" id="errorTitle"></p>
           <p class="errorMessage" id="errorMessage"></p>

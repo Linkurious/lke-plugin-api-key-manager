@@ -34,10 +34,14 @@ type GroupsMap = {
     }[];
   }[];
   groups: string[];
+  admin_group: number;
 };
+
+let groupsMap: GroupsMap;
 
 async function closePopup(this: HTMLDivElement) {
   this.closest('.popin')?.classList.remove('show');
+  await resetKeyForm();
 }
 
 function deleteWebhook(webhookId: number) {
@@ -69,15 +73,21 @@ function addKey() {
         const tagContainer = document.getElementById('tagContainer') as HTMLDivElement;
 
         const tags = Array.from(tagContainer.querySelectorAll('.tag')) as HTMLDivElement[];
+        const includeAdminSwitch = document.getElementById('includeAdmin') as HTMLInputElement;
 
         let groups: number[] = [];
+
+        if (includeAdminSwitch.checked) {
+          groups.push(groupsMap.admin_group);
+        }
+
         for (const tag of tags) {
           const groupId = tag.getAttribute('group-id');
           if (groupId) {
             groups.push(parseInt(groupId));
           }
         }
-
+  
         const rights = getSelectedAccessRights();
 
         const errorBox = document.getElementById('errorBox') as HTMLDivElement;
@@ -119,7 +129,8 @@ function addKey() {
               id: parseInt(addKeyForm.getAttribute('key-id') || '0'),
               name: name.value,
               rights: rights,
-              groups: groups
+              groups: groups,
+              enabled: 
             };
 
             await parseLinkuriousAPI(
@@ -214,7 +225,7 @@ async function showFullpagePopup(mode = 'create', blockApp = false) {
   const popup = document.getElementById('createView') as HTMLDivElement;
   const close = popup.querySelector('.close') as HTMLAnchorElement;
 
-  const addButton = document.getElementById('addWebhook') as HTMLButtonElement;
+  const addButton = document.getElementById('addApiKey') as HTMLButtonElement;
   if (mode === 'create') {
     addButton.innerText = 'CREATE';
   } else if (mode === 'update') {
@@ -235,10 +246,6 @@ async function showFullpagePopup(mode = 'create', blockApp = false) {
   } else {
     close.classList.remove('.none');
     popup.classList.remove('hider');
-  }
-
-  if (mode === 'create') {
-    await resetKeyForm();
   }
 
   popup.classList.add('show');
@@ -289,15 +296,28 @@ async function resetKeyForm() {
   datasourceSelect.selectedIndex = 0;
   groupSelect.innerHTML = '<option value="" disabled selected>Select a Group</option>';
   groupSelect.removeAttribute('group-id');
+
+  // resetting include admin switch
+  const includeAdminSwitch = document.getElementById('includeAdmin') as HTMLInputElement;
+  includeAdminSwitch.checked = false;
+
+  // resetting error box
+  const errorBox = document.getElementById('errorBox') as HTMLDivElement;
+  const errorTitle = document.getElementById('errorTitle') as HTMLHeadingElement;
+  const errorMessage = document.getElementById('errorMessage') as HTMLParagraphElement;
+  errorBox.classList.remove('show');
+  errorTitle.textContent = '';
+  errorMessage.textContent = '';
+
 }
 
 async function loadGroupList() {
-  const groupsMap = await fetch(`api/groups`);
-  const groupsData = await groupsMap.json();
+  const groupsMapResponse = await fetch(`api/groups`);
+  groupsMap = await groupsMapResponse.json();
   const datasourceSelect = document.getElementById('datasourceSelect') as HTMLSelectElement;
   const groupSelect = document.getElementById('groupSelect') as HTMLSelectElement;
 
-  for (const datasource of groupsData.datasources) {
+  for (const datasource of groupsMap.datasources) {
     const option = document.createElement('option');
     datasourceSelect.appendChild(option);
     if (datasource.connected === false) {
@@ -333,14 +353,16 @@ async function loadGroupList() {
     //   }
     // }
 
-    const groups = groupsData.datasources.find((ds: any) => ds.sourcekey === selectedSourceKey)?.groups || [];
+    const groups = groupsMap.datasources.find((ds: any) => ds.sourcekey === selectedSourceKey)?.groups || [];
 
     for (const group of groups) {
-      const option = document.createElement('option');
-      groupSelect.appendChild(option);
-      option.setAttribute('group-id', group.id);
-      option.value = group.name;
-      option.textContent = group.name + ' (' + group.id + ')';
+      if (group.id !== groupsMap.admin_group) {
+        const option = document.createElement('option');
+        groupSelect.appendChild(option);
+        option.setAttribute('group-id', group.id.toString());
+        option.value = group.name;
+        option.textContent = group.name + ' (' + group.id + ')';
+      }
     }
   });
 
@@ -387,26 +409,32 @@ async function fillKeyForm(keyId: number) {
   tagContainer.innerHTML = '';
   const groups = currentKey.groups || [];
   for (const group of groups) {
-    const tag = document.createElement('div');
-    tag.classList.add('tag');
-    tag.setAttribute('group-id', group.id.toString());
+    if (group.id === groupsMap.admin_group) {
+      const includeAdminSwitch = document.getElementById('includeAdmin') as HTMLInputElement;
+      includeAdminSwitch.checked = true;
+    }
+    else {
+      const tag = document.createElement('div');
+      tag.classList.add('tag');
+      tag.setAttribute('group-id', group.id.toString());
 
-    const tagText = document.createElement('div');
-    tagText.classList.add('tagText');
+      const tagText = document.createElement('div');
+      tagText.classList.add('tagText');
 
-    const tagClose = document.createElement('a');
-    tagClose.classList.add('tagClose');
+      const tagClose = document.createElement('a');
+      tagClose.classList.add('tagClose');
 
-    tag.appendChild(tagText);
-    tag.appendChild(tagClose);
+      tag.appendChild(tagText);
+      tag.appendChild(tagClose);
 
-    tagClose.onclick = () => {
-      tag.remove();
-    };
+      tagClose.onclick = () => {
+        tag.remove();
+      };
 
-    tagText.textContent = `${group.name} (${group.sourceKey || '*'})`;
+      tagText.textContent = `${group.name} (${group.sourceKey || '*'})`;
 
-    tagContainer.appendChild(tag);
+      tagContainer.appendChild(tag);
+    }
   }
 
   showFullpagePopup('update');
@@ -446,7 +474,7 @@ async function refreshKeysTable() {
       let groupsRedacted = '';
       if (key.groups !== undefined) {
         for (const group of key.groups) {
-            groupsRedacted += `${group.name} [${group.sourceKey || '*'}]<br><hr>`;
+          groupsRedacted += `${group.name} [${group.sourceKey || '*'}]<br><hr>`;
         }
         groups.innerHTML = groupsRedacted.slice(0, -4);
         tr.append(groups);
@@ -483,7 +511,7 @@ async function refreshKeysTable() {
       );
       actions.append(updateButton);
 
-       // --> Enable Toggle
+      // --> Enable Toggle
       const enableButton = document.createElement('button');
       enableButton.classList.add('button');
       if (key.enabled) {
@@ -493,10 +521,7 @@ async function refreshKeysTable() {
         enableButton.textContent = 'Enable';
         enableButton.classList.add('green');
       }
-      enableButton.addEventListener(
-        'click',
-        () => fillKeyForm(key.id)
-      );
+      enableButton.addEventListener('click', () => changeKeyState(key.id, !key.enabled));
       actions.append(enableButton);
 
       // const deliveriesButton = document.createElement('button');
@@ -522,6 +547,24 @@ async function refreshKeysTable() {
   });
 }
 
+async function changeKeyState(keyId: number, enable: boolean) {
+  await helper.runLongTask(null, async (updater) => {
+    updater.update('Changing API Key status...');
+    await fetch(`api/changeKeyState`, {
+      method: 'PUT',
+      headers: {
+      'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ id: keyId, enabled: enable })
+    });
+    // refreshing the keys table
+    const table = document.querySelector('#keysTable tbody')! as HTMLTableElement;
+    table.innerHTML = '';
+    await refreshKeysTable();
+    void helper.showPopin('info', `API Key ${enable ? 'enabled' : 'disabled'} successfully`);
+  });
+}
+
 async function init() {
   helper.expose({ restClient: new RestClient({ baseUrl: '../..' }) });
 
@@ -532,7 +575,7 @@ async function init() {
       .querySelectorAll('.popin .cancelButton')
       .forEach((p) => (<HTMLAnchorElement>p).addEventListener('click', closePopup));
     document.getElementById('addGroup')?.addEventListener('click', addGroup);
-    document.getElementById('addWebhook')?.addEventListener('click', addKey);
+    document.getElementById('addApiKey')?.addEventListener('click', addKey);
     await refreshKeysTable();
     await loadGroupList();
     await generateAccessRightsForm();

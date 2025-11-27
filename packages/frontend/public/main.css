@@ -139,6 +139,15 @@ input {
   background-color: red;
 }
 
+.button.green {
+  background-color: #4CAF50;
+}
+
+.button.green:hover,
+.button.green:focus {
+  background-color: #45a049;
+}
+
 .button.hasNext {
   margin-right: 5px;
 }
@@ -500,6 +509,18 @@ div.rights-wrapper {
   display: flex;
 }
 
+div.admin-switch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  margin-left: 2px;
+}
+div.admin-switch span {
+  margin: 0px;
+  font-weight: bold;
+}
 hr {
   border: 0;
   border-top: 1px solid #ccc;
@@ -522,4 +543,59 @@ span.tooltip{
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
   z-index: 10;
   transition: opacity 0.2s;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 26px;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+.switch input { 
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .2s;
+  transition: .2s;
+  border-radius: 26px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .2s;
+  transition: .2s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #0062fa;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #0062fa;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(20px);
+  -ms-transform: translateX(20px);
+  transform: translateX(20px);
 }

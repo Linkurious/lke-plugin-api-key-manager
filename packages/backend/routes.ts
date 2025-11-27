@@ -26,6 +26,7 @@ type GroupsMap = {
     }[];
   }[];
   groups: string[];
+  admin_group: number;
 };
 
 //const groupedActions = groupActions();
@@ -101,20 +102,25 @@ const configureRoutes = async function (
 
       await parseLinkuriousAPI(restClient.application.getApplications(), (body) => {
         body.forEach((key: any) => {
-          key.groups.forEach((group: any) => {
-            if (group.sourceKey === "*") {
-              group.sourceKey = "*";
-            } else if (group.sourceKey in datasources) {
-              group.sourceKey = `${datasources[group.sourceKey]} (${group.sourceKey})`;
-            } else {
-              group.sourceKey += " (Offline)";
-            }
-          });
+            key.groups
+            .sort((a: any, b: any) => a.id - b.id)
+            .forEach((group: any) => {
+              if (group.sourceKey === "*") {
+                group.sourceKey = "*";
+              } else if (group.sourceKey in datasources) {
+                group.sourceKey = `${datasources[group.sourceKey]} (${group.sourceKey})`;
+              } else {
+                group.sourceKey = "Disconnected (" + group.sourceKey + ")";
+              }
+            });
 
           // let userRights = JSON.parse(JSON.stringify(groupedActions));
 
           key.rights = groupActions(key.rights);
         });
+        
+        // Sort by name
+        body.sort((a: any, b: any) => a.name.localeCompare(b.name));
 
         return res.json(body);
       });
@@ -140,11 +146,26 @@ const configureRoutes = async function (
     })
   );
 
+  options.router.put(
+    '/changeKeyState',
+    respond(async (req, res) => {
+      const restClient = options.getRestClient(req);
+      const { id, enabled } = req.body;
+
+      await parseLinkuriousAPI(restClient.application.updateApplication({
+        id: parseInt(id),
+        enabled: enabled
+      }), (body) => {
+        return res.json(body);
+      });
+    })
+  );
+
   options.router.get(
     '/groups',
     respond(async (req, res) => {
 
-      let result: GroupsMap = { datasources: [], groups: [] };
+      let result: GroupsMap = { datasources: [], groups: [], admin_group: 1 };
       const restClient = options.getRestClient(req);
       const datasources = await parseLinkuriousAPI(restClient.dataSource.getDataSources());
 
@@ -155,7 +176,10 @@ const configureRoutes = async function (
           groups = await parseLinkuriousAPI(restClient.user.getGroups({ sourceKey: datasource.key }));
 
           for (const group of groups) {
-            if (!result.groups.includes(group.name)) {
+            if (group.name === 'admin' && group.builtin === true) {
+              result.admin_group = group.id;
+            }
+            else if (!result.groups.includes(group.name)) {
               result.groups.push(group.name);
             }
           }
@@ -168,7 +192,7 @@ const configureRoutes = async function (
           groups: groups.map((g: any) => ({ name: g.name, id: g.id }))
         });
       }
-
+      console.log(result);
       res.json(result);
     })
   );
@@ -206,5 +230,3 @@ function groupActions(actionList: string[]): RightsMap {
 }
 
 export default configureRoutes;
-
-console.log(groupActions(Object.values(ApiRight).sort()));

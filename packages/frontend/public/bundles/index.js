@@ -9050,6 +9050,7 @@
       var import_rest_client = __toESM(require_dist());
       init_shared();
       init_helper();
+      var groupsMap;
       function closePopup() {
         return __async(this, null, function* () {
           var _a;
@@ -9067,7 +9068,11 @@
               const rightsContainer = document.getElementById("accessRightsContainer");
               const tagContainer = document.getElementById("tagContainer");
               const tags = Array.from(tagContainer.querySelectorAll(".tag"));
+              const includeAdminSwitch = document.getElementById("includeAdmin");
               let groups = [];
+              if (includeAdminSwitch.checked) {
+                groups.push(groupsMap.admin_group);
+              }
               for (const tag of tags) {
                 const groupId = tag.getAttribute("group-id");
                 if (groupId) {
@@ -9168,7 +9173,7 @@
         return __async(this, null, function* () {
           const popup = document.getElementById("createView");
           const close = popup.querySelector(".close");
-          const addButton = document.getElementById("addWebhook");
+          const addButton = document.getElementById("addApiKey");
           if (mode === "create") {
             addButton.innerText = "CREATE";
           } else if (mode === "update") {
@@ -9213,15 +9218,23 @@
           datasourceSelect.selectedIndex = 0;
           groupSelect.innerHTML = '<option value="" disabled selected>Select a Group</option>';
           groupSelect.removeAttribute("group-id");
+          const includeAdminSwitch = document.getElementById("includeAdmin");
+          includeAdminSwitch.checked = false;
+          const errorBox = document.getElementById("errorBox");
+          const errorTitle = document.getElementById("errorTitle");
+          const errorMessage = document.getElementById("errorMessage");
+          errorBox.classList.remove("show");
+          errorTitle.textContent = "";
+          errorMessage.textContent = "";
         });
       }
       function loadGroupList() {
         return __async(this, null, function* () {
-          const groupsMap = yield fetch(`api/groups`);
-          const groupsData = yield groupsMap.json();
+          const groupsMapResponse = yield fetch(`api/groups`);
+          groupsMap = yield groupsMapResponse.json();
           const datasourceSelect = document.getElementById("datasourceSelect");
           const groupSelect = document.getElementById("groupSelect");
-          for (const datasource of groupsData.datasources) {
+          for (const datasource of groupsMap.datasources) {
             const option = document.createElement("option");
             datasourceSelect.appendChild(option);
             if (datasource.connected === false) {
@@ -9236,13 +9249,15 @@
             var _a;
             groupSelect.innerHTML = '<option value="" disabled selected>Select a Group</option>';
             const selectedSourceKey = this.value;
-            const groups = ((_a = groupsData.datasources.find((ds) => ds.sourcekey === selectedSourceKey)) == null ? void 0 : _a.groups) || [];
+            const groups = ((_a = groupsMap.datasources.find((ds) => ds.sourcekey === selectedSourceKey)) == null ? void 0 : _a.groups) || [];
             for (const group2 of groups) {
-              const option = document.createElement("option");
-              groupSelect.appendChild(option);
-              option.setAttribute("group-id", group2.id);
-              option.value = group2.name;
-              option.textContent = group2.name + " (" + group2.id + ")";
+              if (group2.id !== groupsMap.admin_group) {
+                const option = document.createElement("option");
+                groupSelect.appendChild(option);
+                option.setAttribute("group-id", group2.id.toString());
+                option.value = group2.name;
+                option.textContent = group2.name + " (" + group2.id + ")";
+              }
             }
           });
           groupSelect.addEventListener("change", function() {
@@ -9253,6 +9268,12 @@
       }
       function fillKeyForm(keyId) {
         return __async(this, null, function* () {
+          const errorBox = document.getElementById("errorBox");
+          const errorTitle = document.getElementById("errorTitle");
+          const errorMessage = document.getElementById("errorMessage");
+          errorBox.classList.remove("show");
+          errorTitle.textContent = "";
+          errorMessage.textContent = "";
           const currentKeyResponse = yield fetch(`api/keys/${keyId}`);
           const currentKey = yield currentKeyResponse.json();
           const addKeyForm = document.getElementById("addKeyForm");
@@ -9281,20 +9302,25 @@
           tagContainer.innerHTML = "";
           const groups = currentKey.groups || [];
           for (const group2 of groups) {
-            const tag = document.createElement("div");
-            tag.classList.add("tag");
-            tag.setAttribute("group-id", group2.id.toString());
-            const tagText = document.createElement("div");
-            tagText.classList.add("tagText");
-            const tagClose = document.createElement("a");
-            tagClose.classList.add("tagClose");
-            tag.appendChild(tagText);
-            tag.appendChild(tagClose);
-            tagClose.onclick = () => {
-              tag.remove();
-            };
-            tagText.textContent = `${group2.name} (${group2.sourceKey || "*"})`;
-            tagContainer.appendChild(tag);
+            if (group2.id === groupsMap.admin_group) {
+              const includeAdminSwitch = document.getElementById("includeAdmin");
+              includeAdminSwitch.checked = true;
+            } else {
+              const tag = document.createElement("div");
+              tag.classList.add("tag");
+              tag.setAttribute("group-id", group2.id.toString());
+              const tagText = document.createElement("div");
+              tagText.classList.add("tagText");
+              const tagClose = document.createElement("a");
+              tagClose.classList.add("tagClose");
+              tag.appendChild(tagText);
+              tag.appendChild(tagClose);
+              tagClose.onclick = () => {
+                tag.remove();
+              };
+              tagText.textContent = `${group2.name} (${group2.sourceKey || "*"})`;
+              tagContainer.appendChild(tag);
+            }
           }
           showFullpagePopup("update");
         });
@@ -9362,15 +9388,30 @@
                 enableButton.textContent = "Enable";
                 enableButton.classList.add("green");
               }
-              enableButton.addEventListener(
-                "click",
-                () => fillKeyForm(key.id)
-              );
+              enableButton.addEventListener("click", () => changeKeyState(key.id, !key.enabled));
               actions.append(enableButton);
               tr.append(actions);
               tbody.appendChild(tr);
             }
             table.replaceWith(tbody);
+          }));
+        });
+      }
+      function changeKeyState(keyId, enable) {
+        return __async(this, null, function* () {
+          yield runLongTask(null, (updater) => __async(this, null, function* () {
+            updater.update("Changing API Key status...");
+            yield fetch(`api/changeKeyState`, {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({ id: keyId, enabled: enable })
+            });
+            const table = document.querySelector("#keysTable tbody");
+            table.innerHTML = "";
+            yield refreshKeysTable();
+            void showPopin("info", `API Key ${enable ? "enabled" : "disabled"} successfully`);
           }));
         });
       }
@@ -9382,7 +9423,7 @@
             document.getElementById("addButton").onclick = () => showFullpagePopup();
             document.querySelectorAll(".popin .cancelButton").forEach((p) => p.addEventListener("click", closePopup));
             (_a = document.getElementById("addGroup")) == null ? void 0 : _a.addEventListener("click", addGroup);
-            (_b = document.getElementById("addWebhook")) == null ? void 0 : _b.addEventListener("click", addKey);
+            (_b = document.getElementById("addApiKey")) == null ? void 0 : _b.addEventListener("click", addKey);
             yield refreshKeysTable();
             yield loadGroupList();
             yield generateAccessRightsForm();
