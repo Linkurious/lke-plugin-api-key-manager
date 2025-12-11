@@ -1,4 +1,4 @@
-import * as LKE from '@linkurious/rest-client';
+import type * as LKE from '@linkurious/rest-client';
 
 /*
  * parseLinkuriousAPI

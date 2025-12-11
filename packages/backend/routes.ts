@@ -1,12 +1,12 @@
 import * as express from 'express';
-import { NextFunction, Request, Response } from 'express';
-import { ApiRight, IConnectDataSourceParams, PluginRouteOptions } from '@linkurious/rest-client';
+// import { NextFunction, Request, Response } from 'express';
+import  type { ApiRight, IConnectDataSourceParams, PluginRouteOptions } from '@linkurious/rest-client';
 
 import { PluginConfig } from '../@types/plugin';
 
 import { loggerFormatter, parseLinkuriousAPI } from './shared';
 import { PluginError, UnauthorizedPluginError } from './exceptions';
-import { parse } from 'path';
+// import { parse } from 'path';
 
 type RightsMap = {
   [key: string]: {
@@ -31,9 +31,13 @@ type GroupsMap = {
 
 //const groupedActions = groupActions();
 
-const configureRoutes = async function (
+console.log("Routes module loaded");
+
+export = async function configureRoute (
   options: PluginRouteOptions<PluginConfig> & { serverRootFolder?: string }
 ): Promise<void> {
+  console.log("Configuring routes...");
+  
   console.log = loggerFormatter(console.log);
   console.warn = loggerFormatter(console.warn);
   console.info = loggerFormatter(console.info);
@@ -41,6 +45,7 @@ const configureRoutes = async function (
   console.debug = loggerFormatter(console.debug);
 
   options.router.use(express.json());
+  console.log("JSON body parser configured");
 
   function respond(
     promiseFunction: (
@@ -119,8 +124,13 @@ const configureRoutes = async function (
           key.rights = groupActions(key.rights);
         });
         
-        // Sort by name
-        body.sort((a: any, b: any) => a.name.localeCompare(b.name));
+        // Sort by name and by state
+        body.sort((a: any, b: any) => {
+          if (a.enabled !== b.enabled) {
+            return b.enabled - a.enabled;
+          }
+          return a.name.localeCompare(b.name);
+        });
 
         return res.json(body);
       });
@@ -196,6 +206,8 @@ const configureRoutes = async function (
       res.json(result);
     })
   );
+
+  console.log("Routes loaded");
 };
 
 
@@ -228,5 +240,3 @@ function groupActions(actionList: string[]): RightsMap {
     return acc;
   }, {} as RightsMap);
 }
-
-export default configureRoutes;

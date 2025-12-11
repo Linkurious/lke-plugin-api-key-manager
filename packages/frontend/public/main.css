@@ -127,6 +127,18 @@ input {
   transition: background-color 0.5s;
 }
 
+.button.secondary {
+  background-color: transparent;
+  border: 1px solid #0062fa;
+  color: #0062fa;
+}
+
+.button.secondary:hover,
+.button.secondary:focus {
+  background-color: #0062fa;
+  color: #FFFFFF;
+}
+
 .button.small {
   height: 36px;
   padding: 5px 10px;
@@ -200,24 +212,8 @@ input {
 
 .tooltip {
   position: relative;
-}
-
-.tooltip:hover::after {
-  background: rgb(50, 50, 50);
-  border: 1px solid white;
-  border-radius: 10px;
-  top: -65px;
-  right: -100px;
-  content: attr(message);
-  display: inline-block;
-  padding: 10px;
-  position: absolute;
-  width: 380px;
-  max-height: 40px;
-  z-index: 100;
-  margin: 5px;
-  font-size: 14px;
-  overflow: hidden;
+  font-family: "Haas Grot Text R Web", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  cursor: default
 }
 
 .confirmButtons {
@@ -391,9 +387,9 @@ form select:focus {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  background-color: #4CAF50;
+  background-color: #7f8c8d;
   color: white;
-  padding: 4px 8px 4px 12px;
+  padding: 2px 6px 2px 10px;
   border-radius: 20px;
   font-size: 14px;
   /* font-family: Arial, sans-serif; */
@@ -401,15 +397,43 @@ form select:focus {
   position: relative;
   transition: background-color 0.3s;
   margin: 2px;
+  cursor: default;
 }
 
-.badge:hover {
-  background-color: #45a049;
+.masked-key {
+  cursor: pointer;
+  position: relative;
+  padding-right: 25px;
+  font-family: monospace;
+}
+
+.masked-key::after {
+  content: "";
+  width: 20px;
+  height: 20px;
+  background-image: url(assets/copy-icon.svg);
+  background-repeat: no-repeat;
+  background-position: center;
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-55%);
+}
+
+.badge.green {
+  background-color: #4CAF50;
+  padding: 2px 12px 2px 12px;
+}
+
+.badge.red {
+  background-color: red;
+  padding: 2px 12px 2px 12px;
+  cursor: default;
 }
 
 .badge .number {
   background-color: white;
-  color: #4CAF50;
+  color: #7f8c8d;
   border-radius: 50%;
   width: 20px;
   height: 20px;
@@ -429,11 +453,11 @@ form select:focus {
   margin-top: 6px;
   background-color: #333;
   color: white;
-  padding: 6px 10px;
+  padding: 2px 10px;
   border-radius: 8px;
   white-space: nowrap;
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-  opacity: 80%;
+  opacity: 90%;
   font-size: 1em;
   z-index: 10;
 }
@@ -448,7 +472,7 @@ button.collapse-toggle {
   border: none;
   background: none;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 14px;
   padding: 0;
   vertical-align: middle;
   width: 1.5em;
@@ -459,6 +483,7 @@ label.group-label {
   align-items: center;
   gap: 6px;
   margin-bottom: 0px;
+  font-size: 14px;
 }
 
 label.action-label {
@@ -466,6 +491,7 @@ label.action-label {
   align-items: center;
   margin-bottom: 0px;
   gap: 6px;
+  font-size: 14px;
 }
 
 ul.tree-multiselect {
@@ -509,18 +535,20 @@ div.rights-wrapper {
   display: flex;
 }
 
-div.admin-switch {
+div.switch-element {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-top: 10px;
-  margin-bottom: 20px;
+  /* margin-top: 5px; */
+  margin-bottom: 10px;
   margin-left: 2px;
 }
-div.admin-switch span {
+div.switch-element span {
   margin: 0px;
   font-weight: bold;
+  font-size: 14px;
 }
+
 hr {
   border: 0;
   border-top: 1px solid #ccc;
@@ -548,8 +576,8 @@ span.tooltip{
 .switch {
   position: relative;
   display: inline-block;
-  width: 46px;
-  height: 26px;
+  width: 40px;
+  height: 24px;
   margin-top: auto;
   margin-bottom: auto;
 }
@@ -570,14 +598,14 @@ span.tooltip{
   background-color: #ccc;
   -webkit-transition: .2s;
   transition: .2s;
-  border-radius: 26px;
+  border-radius: 24px;
 }
 
 .slider:before {
   position: absolute;
   content: "";
-  height: 18px;
-  width: 18px;
+  height: 16px;
+  width: 16px;
   left: 4px;
   bottom: 4px;
   background-color: white;
@@ -595,7 +623,7 @@ input:focus + .slider {
 }
 
 input:checked + .slider:before {
-  -webkit-transform: translateX(20px);
-  -ms-transform: translateX(20px);
-  transform: translateX(20px);
+  -webkit-transform: translateX(16px);
+  -ms-transform: translateX(16px);
+  transform: translateX(16px);
 }

@@ -21,10 +21,10 @@
       <thead>
         <tr>
           <th>Name</th>
-          <th>State</th>
           <th>Groups</th>
           <th>Access Rights</th>
           <th>API Key</th>
+          <th>State</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -45,11 +45,18 @@
     <div class="popinContent fullpage">
       <a class="close"></a>
       <div class="messageDisplay">
-        <h2 class="popinTitle">Create an API Key</h2>
+        <h2 class="popinTitle" id="popinTitle"></h2>
         <div class="form">
           <form id="addKeyForm" class="hasNext">
             <label for="name">Name:</label>
             <input type="text" id="keyName" name="keyName" required>
+            <div class="switch-element">
+                <label class="switch enabled">
+                  <input id="enableKey" type="checkbox">
+                  <span class="slider"></span>
+                </label>
+                <span>Enabled</span>
+              </div>
             <!-- <label for="secret">Secret:</label> -->
             <!-- <input type="password" id="secret" name="secret" required> -->
           </form>
@@ -59,24 +66,25 @@
           </form>
           <form id="addGroupsForm">
             <label for="groups">Groups:</label>
+            <div class="switch-element">
+                <label class="switch">
+                  <input id="includeAdmin" type="checkbox">
+                  <span class="slider"></span>
+                </label>
+                <span>Include Admin Group</span>
+              </div>
             <div class="trackedEvent">
               <div class="tagContainer" id="tagContainer"></div>
               <div class="selectors">
-                 <select name="dataSource" id="datasourceSelect" required>
+                <select name="dataSource" id="datasourceSelect" required>
                   <option value="" disabled selected>Select a Datasource</option>
                 </select>
                 <select name="groupType" id="groupSelect" required>
                   <option value="" disabled selected>Select a Group</option>
                 </select>
-                <button class="button small" type="button" id="addGroup">Add Group</button></div>
-                <div class="admin-switch">
-                  <label class="switch">
-                    <input id="includeAdmin" type="checkbox">
-                      <span class="slider"></span>
-                  </label>
-                  <span>Include Admin Group</span>
-                </div>
+                <button class="button small" type="button" id="addGroup">Add Group</button>
               </div>
+            </div>
           </form>
         </div>
         <button class="button" type="button" id="addApiKey">CREATE</button>

@@ -5,7 +5,7 @@ import {
   IUpdateApplicationParams
 } from '@linkurious/rest-client';
 
-import { parseLinkuriousAPI } from '../../backend/shared';
+import { parseLinkuriousAPI } from '@lke-plugin/backend/shared';
 
 import * as helper from './helper';
 import { group } from 'console';
@@ -14,7 +14,7 @@ declare global {
   interface Window {
     restClient: RestClient;
   }
-}
+} 
 
 type RightsMap = {
   [key: string]: {
@@ -41,22 +41,7 @@ let groupsMap: GroupsMap;
 
 async function closePopup(this: HTMLDivElement) {
   this.closest('.popin')?.classList.remove('show');
-  await resetKeyForm();
-}
-
-function deleteWebhook(webhookId: number) {
-  void helper.runLongTask(null, async () => {
-    closePopup.call(document.getElementById('confirmPopin') as HTMLDivElement);
-    await parseLinkuriousAPI(window.restClient.webhook.deleteWebhook({ webhookId: webhookId }));
-    // Refresh the webhooks table
-    const table = document.querySelector('#webhooksTable tbody')! as HTMLTableElement;
-    const rowToDelete = table.querySelector(`tr[webhook-id="${webhookId}"]`);
-    if (rowToDelete) {
-      rowToDelete.remove();
-    }
-
-    void helper.showPopin('info', 'Webhook deleted successfully');
-  });
+  // await resetKeyForm();
 }
 
 function addKey() {
@@ -69,6 +54,7 @@ function addKey() {
 
       if (addKeyForm.reportValidity()) {
         const name = document.getElementById('keyName') as HTMLInputElement;
+        const enabled = document.getElementById('enableKey') as HTMLInputElement;
         const rightsContainer = (document.getElementById('accessRightsContainer') as HTMLDivElement)
         const tagContainer = document.getElementById('tagContainer') as HTMLDivElement;
 
@@ -99,7 +85,8 @@ function addKey() {
             const body: ICreateApplicationParams = {
               name: name.value,
               rights: rights,
-              groups: groups
+              groups: groups,
+              enabled: enabled.checked
             };
 
             await parseLinkuriousAPI(
@@ -130,7 +117,7 @@ function addKey() {
               name: name.value,
               rights: rights,
               groups: groups,
-              enabled: 
+              enabled: enabled.checked
             };
 
             await parseLinkuriousAPI(
@@ -202,33 +189,19 @@ function addGroup() {
 
 }
 
-function showConfirmPopup(webhookId: number, blockApp = false) {
-  const popup = document.getElementById('confirmPopin') as HTMLDivElement;
-  const cancel = popup.querySelector('.button.cancelButton') as HTMLAnchorElement;
-  const confirm = popup.querySelector('.button.confirmButton') as HTMLAnchorElement;
-
-  confirm.onclick = () => deleteWebhook(webhookId);
-
-  if (blockApp) {
-    cancel.classList.add('.none');
-    popup.classList.add('hider');
-  } else {
-    cancel.classList.remove('.none');
-    popup.classList.remove('hider');
-  }
-
-  popup.classList.add('show');
-}
-
 async function showFullpagePopup(mode = 'create', blockApp = false) {
 
   const popup = document.getElementById('createView') as HTMLDivElement;
   const close = popup.querySelector('.close') as HTMLAnchorElement;
+  const title = document.getElementById('popinTitle') as HTMLHeadingElement;
 
   const addButton = document.getElementById('addApiKey') as HTMLButtonElement;
   if (mode === 'create') {
+    await resetKeyForm();
+    title.innerText = 'Create an API Key';
     addButton.innerText = 'CREATE';
   } else if (mode === 'update') {
+    title.innerText = 'Update an API Key';
     addButton.innerText = 'UPDATE';
   }
 
@@ -249,22 +222,6 @@ async function showFullpagePopup(mode = 'create', blockApp = false) {
   }
 
   popup.classList.add('show');
-}
-
-async function loadDatasourceList() {
-  const datasources = await parseLinkuriousAPI(window.restClient.dataSource.getDataSources());
-  const datasourceSelect = document.getElementById('datasourceSelect') as HTMLSelectElement;
-  for (const datasource of datasources) {
-    const option = document.createElement('option');
-    datasourceSelect.appendChild(option);
-    if (datasource.key === undefined) {
-      option.disabled = true;
-      option.textContent = datasource.name + ' (not connected)';
-    } else {
-      option.value = datasource.key;
-      option.textContent = datasource.name + ' (' + datasource.key + ')';
-    }
-  }
 }
 
 async function resetKeyForm() {
@@ -374,6 +331,8 @@ async function loadGroupList() {
 
 async function fillKeyForm(keyId: number) {
 
+  await resetKeyForm();
+
   const currentKeyResponse = await fetch(`api/keys/${keyId}`);
   const currentKey = await currentKeyResponse.json();
 
@@ -383,6 +342,9 @@ async function fillKeyForm(keyId: number) {
 
   const name = document.getElementById('keyName') as HTMLInputElement;
   name.value = currentKey.name || '';
+
+  const enabled = document.getElementById('enableKey') as HTMLInputElement;
+  currentKey.enabled ? enabled.checked = true : enabled.checked = false;
 
   const currentRights: RightsMap = currentKey.rights || [];
 
@@ -459,15 +421,6 @@ async function refreshKeysTable() {
       name.textContent = key.name;
       tr.append(name);
 
-      // state
-      const state = document.createElement('td');
-      if (key.enabled) {
-        state.textContent = "Enabled"
-      } else {
-        state.textContent = "Disabled"
-      }
-      tr.append(state);
-
       // groups
       const groups = document.createElement('td');
       groups.style.whiteSpace = 'nowrap';
@@ -498,12 +451,21 @@ async function refreshKeysTable() {
       apiKey = maskKey(apiKey);
       tr.append(apiKey);
 
+      // state
+      const state = document.createElement('td');
+      if (key.enabled) {
+        state.innerHTML = "<span class='badge green'>Enabled</span>";
+      } else {
+        state.innerHTML = "<span class='badge red'>Disabled</span>";
+      }
+      tr.append(state);
+
       // actions
       const actions = document.createElement('td');
 
       // --> Update
       const updateButton = document.createElement('button');
-      updateButton.classList.add('button', 'hasNext');
+      updateButton.classList.add('button', 'secondary');
       updateButton.textContent = 'Update';
       updateButton.addEventListener(
         'click',
@@ -511,57 +473,12 @@ async function refreshKeysTable() {
       );
       actions.append(updateButton);
 
-      // --> Enable Toggle
-      const enableButton = document.createElement('button');
-      enableButton.classList.add('button');
-      if (key.enabled) {
-        enableButton.textContent = 'Disable';
-        enableButton.classList.add('red');
-      } else {
-        enableButton.textContent = 'Enable';
-        enableButton.classList.add('green');
-      }
-      enableButton.addEventListener('click', () => changeKeyState(key.id, !key.enabled));
-      actions.append(enableButton);
-
-      // const deliveriesButton = document.createElement('button');
-      // deliveriesButton.classList.add('button', 'hasNext');
-      // deliveriesButton.textContent = 'Deliveries';
-      // deliveriesButton.addEventListener('click', () =>
-      //   window.open(`../../api/admin/webhooks/${webhook.id}/deliveries`, '_blank')
-      // );
-      // actions.append(deliveriesButton);
-
-      // const deleteButton = document.createElement('button');
-      // deleteButton.classList.add('button', 'red');
-      // deleteButton.textContent = 'Delete';
-      // deleteButton.addEventListener('click', () => showConfirmPopup(webhook.id));
-      // actions.append(deleteButton);
-
       tr.append(actions);
 
       tbody.appendChild(tr);
     }
 
     table.replaceWith(tbody);
-  });
-}
-
-async function changeKeyState(keyId: number, enable: boolean) {
-  await helper.runLongTask(null, async (updater) => {
-    updater.update('Changing API Key status...');
-    await fetch(`api/changeKeyState`, {
-      method: 'PUT',
-      headers: {
-      'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ id: keyId, enabled: enable })
-    });
-    // refreshing the keys table
-    const table = document.querySelector('#keysTable tbody')! as HTMLTableElement;
-    table.innerHTML = '';
-    await refreshKeysTable();
-    void helper.showPopin('info', `API Key ${enable ? 'enabled' : 'disabled'} successfully`);
   });
 }
 
@@ -588,6 +505,7 @@ function maskKey(cell: HTMLTableCellElement): HTMLTableCellElement {
   cell.textContent = '';
 
   const container = document.createElement('span');
+  container.className = 'masked-key';
   const masked = key.slice(0, 5) + "..." + key.slice(-5);
 
   // Set pointer cursor
@@ -648,7 +566,6 @@ function createBadge(
 }
 
 function groupActions(actionList: string[]): RightsMap {
-  //const actionList = Object.values(ApiRight).sort().filter((action) => typeof action === 'string') as string[];
   return actionList.reduce((acc, currentAction) => {
     const parts = currentAction.split('.');
 
@@ -680,7 +597,9 @@ function generateAccessRightsForm() {
   const container = document.getElementById('accessRightsContainer') as HTMLDivElement;
   container.innerHTML = '';
 
-  const data = groupActions(Object.values(ApiRight).sort());
+  //TODO: harden the control
+  const data = groupActions(Object.values(ApiRight).filter((value) => typeof value === 'string' && !value.startsWith('admin')).sort());
+  // const data = groupActions(Object.values(ApiRight).sort());
 
   // Create a wrapper for two columns
   const columnsWrapper = document.createElement('div');

@@ -4,13 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "esbuild src/*.ts --bundle --outdir=public/bundles --target=es6 --platform=browser --sourcemap --watch",
-    "build": "esbuild src/*.ts --bundle --outdir=public/bundles --target=es6 --platform=browser --sourcemap --minify",
+    "build": "cp -r public ../../dist/ && esbuild src/*.ts --bundle --outdir=../../dist/public/bundles --target=es6 --platform=browser --sourcemap --minify",
     "clean": "rm -rf public/bundles"
   },
   "dependencies": {},
   "devDependencies": {
     "@linkurious/rest-client": "^4.1.0",
     "typescript": "^5.3.3",
-    "esbuild": "0.16.17"
+    "esbuild": "0.16.17",
+    "@lke-plugin/backend": "file:../backend"
   }
 }

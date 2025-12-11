@@ -134,10 +134,11 @@ dist
 /backend
 /debug
 /frontend
-/public/bundles
+packages/frontend/public/bundles
 
 *.private.*
 builds/
 
 # Development
 /dev
+/tmp
