@@ -1,12 +1,10 @@
 import * as express from 'express';
-// import { NextFunction, Request, Response } from 'express';
 import  type { ApiRight, IConnectDataSourceParams, PluginRouteOptions } from '@linkurious/rest-client';
 
 import { PluginConfig } from '../@types/plugin';
 
 import { loggerFormatter, parseLinkuriousAPI } from './shared';
 import { PluginError, UnauthorizedPluginError } from './exceptions';
-// import { parse } from 'path';
 
 type RightsMap = {
   [key: string]: {
@@ -28,8 +26,6 @@ type GroupsMap = {
   groups: string[];
   admin_group: number;
 };
-
-//const groupedActions = groupActions();
 
 console.log("Routes module loaded");
 
@@ -118,8 +114,6 @@ export = async function configureRoute (
                 group.sourceKey = "Disconnected (" + group.sourceKey + ")";
               }
             });
-
-          // let userRights = JSON.parse(JSON.stringify(groupedActions));
 
           key.rights = groupActions(key.rights);
         });
@@ -212,7 +206,6 @@ export = async function configureRoute (
 
 
 function groupActions(actionList: string[]): RightsMap {
-  //const actionList = Object.values(ApiRight).sort().filter((action) => typeof action === 'string') as string[];
   return actionList.reduce((acc, currentAction) => {
     const parts = currentAction.split('.');
 
@@ -226,7 +219,6 @@ function groupActions(actionList: string[]): RightsMap {
       prefix = parts[0];
       action = parts.slice(1).join('.');
     }
-    // const action = parts.slice(1).join('.');
 
     if (!acc[prefix]) {
       acc[prefix] = { counter: 0, actions: [] }

@@ -131,6 +131,8 @@ input {
   background-color: transparent;
   border: 1px solid #0062fa;
   color: #0062fa;
+  box-shadow: none
+
 }
 
 .button.secondary:hover,

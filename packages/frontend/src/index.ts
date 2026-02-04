@@ -41,7 +41,6 @@ let groupsMap: GroupsMap;
 
 async function closePopup(this: HTMLDivElement) {
   this.closest('.popin')?.classList.remove('show');
-  // await resetKeyForm();
 }
 
 function addKey() {
@@ -100,7 +99,7 @@ function addKey() {
                 const table = document.querySelector('#keysTable tbody')! as HTMLTableElement;
                 table.innerHTML = '';
                 await refreshKeysTable();
-                //closing the formPopup
+                // closing the formPopup
                 closePopup.call(name.parentElement as HTMLDivElement);
 
                 void helper.showPopin('info', 'API Key created successfully');
@@ -131,7 +130,7 @@ function addKey() {
                 const table = document.querySelector('#keysTable tbody')! as HTMLTableElement;
                 table.innerHTML = '';
                 await refreshKeysTable();
-                //closing the formPopup
+                // closing the formPopup
                 closePopup.call(name.parentElement as HTMLDivElement);
 
                 void helper.showPopin('info', 'API Key updated successfully');
@@ -597,9 +596,7 @@ function generateAccessRightsForm() {
   const container = document.getElementById('accessRightsContainer') as HTMLDivElement;
   container.innerHTML = '';
 
-  //TODO: harden the control
   const data = groupActions(Object.values(ApiRight).filter((value) => typeof value === 'string' && !value.startsWith('admin')).sort());
-  // const data = groupActions(Object.values(ApiRight).sort());
 
   // Create a wrapper for two columns
   const columnsWrapper = document.createElement('div');
