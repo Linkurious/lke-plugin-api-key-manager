@@ -13,7 +13,7 @@
   - [Create an API Key](#create-an-api-key)
   - [Edit an API Key](#edit-an-api-key)
 - [Licensing](#licensing)
-
+  
 # Compatibility
 
 This plugin is compatible with Linkurious Enterprise starting from v4.3.0.
@@ -51,7 +51,7 @@ For each API Key, it's possible to check:
 - the *group(s)* the groups that it will impersonate;
 - the list of available *Access Rights*, which are grouped by category. Each category displays the category name and a badge showing the total number of enabled access rights. Hovering over a category displays a tooltip with more information;  
 <p align="center"><img src="doc-assets/focus.png" alt="Access Rights"/></p>
-- 
+
 - the actual *API Key*: it can be easily copied by simply clicking on it;
 - its *state*: whether is enabled or not,
 
@@ -59,12 +59,12 @@ An *Update* button is also available to modify the selected API key.
 
 ## Create an API Key
 
-By clicking on the `+ NEW API KEY` button in the main page, it will be possible to create a new webhook via a form.
+By clicking on the `+ NEW API KEY` button in the main page, it will be possible to create a new API Key via a form.
 
 ![Create an API Key](doc-assets/create.png)
 
 To create an API Key:
-- `Name`: snter a name to identify the API key;
+- `Name`: enter a name to identify the API key;
 - `Enabled`: whether the API key will be active immediately after creation;
 - `Access Rights`: select the access rights to assign to the API key. Clicking on a category selects all access rights within that category. For more granular control, expand the category and select the individual access rights you want to grant;  
 <p align="center"><img src="doc-assets/access-rights.png" alt="Access Rights"/></p>

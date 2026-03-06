@@ -2,7 +2,7 @@
 
 nodeJob {
   // General
-  projectName = "linkurious/lke-plugin-webhook-manager"
+  projectName = "linkurious/lke-plugin-api-key-manager"
   podTemplateNames = ['jnlp-agent-node']
 
   runUnitTests = false
@@ -15,7 +15,7 @@ nodeJob {
 
   //static asset upload
   runPrivateNpmPublish = false
-  binaries = ["lke-plugin-webhook-manager.lke"]
+  binaries = ["lke-plugin-api-key-manager.lke"]
   groupId = 'com.linkurious.plugins'
 
   githubRelease = true
