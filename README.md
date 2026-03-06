@@ -40,7 +40,7 @@ The plugin allows the following actions to be performed:
 
 - review exsisting API Keys;
 - create a new API Key;
-- edit an existing API Keys.
+- edit/disable an existing API Keys.
 
 ## Review an API Key
 
