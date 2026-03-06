@@ -12,7 +12,7 @@ else
   echo "Warning: ./packages/frontend/node_modules not found."
 fi
 
-# 2. Copia node_modules di backend
+# 2. Copy backend node_modules
 if [ -d "./packages/backend/node_modules" ]; then
   mkdir -p ./dist/backend
   cp -R ./packages/backend/node_modules ./dist/backend/node_modules
