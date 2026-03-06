@@ -9,7 +9,7 @@ if [ -d "./packages/frontend/node_modules" ]; then
   cp -R ./packages/frontend/node_modules ./dist/node_modules
   echo "Successfully copied frontend node_modules in ./dist/node_modules"
 else
-  echo "Attenzione: ./packages/frontend/node_modules non esiste."
+  echo "Warning: ./packages/frontend/node_modules not found."
 fi
 
 # 2. Copia node_modules di backend
