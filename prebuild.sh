@@ -18,7 +18,7 @@ if [ -d "./packages/backend/node_modules" ]; then
   cp -R ./packages/backend/node_modules ./dist/backend/node_modules
   echo "Successfully copied backend node_modules in ./dist/backend/node_modules"
 else
-  echo "Attenzione: ./packages/backend/node_modules non esiste."
+  echo "Warning: ./packages/backend/node_modules not found."
 fi
 
 # 3. Reinstalla tutte le dipendenze (prod + dev) per sviluppo
