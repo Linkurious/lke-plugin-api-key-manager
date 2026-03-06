@@ -84,6 +84,7 @@ By clicking on it, it's possible to edit the permissions of the selected API Key
 
 A pre-filled form identical to the one for creating an API Key will be displayed.
 
+Linkurious Enterprise doesn't foreseen the possibility to delete API Keys, so in case you need to dismiss one you can `disable` it via the edit form.
 # Licensing
 
 The `API Key Manager` is licensed under the Apache License, Version 2.0. See [LICENSE](/LICENSE) for the full license text.
