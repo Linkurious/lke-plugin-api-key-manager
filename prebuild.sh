@@ -7,7 +7,7 @@ npm install --workspaces --production
 if [ -d "./packages/frontend/node_modules" ]; then
   mkdir -p ./dist
   cp -R ./packages/frontend/node_modules ./dist/node_modules
-  echo "Copiato frontend node_modules in ./dist/node_modules"
+  echo "Successfully copied frontend node_modules in ./dist/node_modules"
 else
   echo "Attenzione: ./packages/frontend/node_modules non esiste."
 fi
