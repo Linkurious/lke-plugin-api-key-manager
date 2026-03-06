@@ -16,7 +16,7 @@ fi
 if [ -d "./packages/backend/node_modules" ]; then
   mkdir -p ./dist/backend
   cp -R ./packages/backend/node_modules ./dist/backend/node_modules
-  echo "Copiato backend node_modules in ./dist/backend/node_modules"
+  echo "Successfully copied backend node_modules in ./dist/backend/node_modules"
 else
   echo "Attenzione: ./packages/backend/node_modules non esiste."
 fi
