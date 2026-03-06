@@ -24,4 +24,4 @@ fi
 # 3. Reinstalla tutte le dipendenze (prod + dev) per sviluppo
 npm install --workspaces
 
-echo "Pre-build completato."
+echo "Pre-build completed."
