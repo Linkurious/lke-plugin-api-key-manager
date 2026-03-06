@@ -3,7 +3,7 @@
 # 1. Rimuovi devDependencies e installa solo prod
 npm install --workspaces --production
 
-# 2. Copia node_modules di frontend
+# 2. Copy frontend node_modules
 if [ -d "./packages/frontend/node_modules" ]; then
   mkdir -p ./dist
   cp -R ./packages/frontend/node_modules ./dist/node_modules
