@@ -9,8 +9,7 @@
 - [Configurations](#configurations)
 - [URL Parameters](#url-parameters)
 - [User Manual](#user-manual)
-  - [Review an API Key;](#review-an-api-key)
-  - [](#)
+  - [Review an API Key](#review-an-api-key)
   - [Create an API Key](#create-an-api-key)
   - [Edit an API Key](#edit-an-api-key)
 - [Licensing](#licensing)
@@ -43,7 +42,7 @@ The plugin allows the following actions to be performed:
 - create a new API Key;
 - edit an existing API Keys.
 
-## Review an API Key;
+## Review an API Key
 
 All the existing API Keys are enlisted in the main page of the plugin.
 
