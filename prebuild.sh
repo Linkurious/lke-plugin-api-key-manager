@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-# 1. Rimuovi devDependencies e installa solo prod
+# 1. Remove devDependencies and install only production dependencies
 npm install --workspaces --production
 
 # 2. Copy frontend node_modules
