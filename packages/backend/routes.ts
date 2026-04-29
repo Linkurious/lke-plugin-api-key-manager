@@ -46,7 +46,7 @@ type ApplicationItem = {
   name: string;
   enabled: boolean;
   groups: GroupItem[];
-  rights: string[];
+  rights: string[] | RightsMap;
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
