@@ -23,12 +23,7 @@
     "tsx": "^4.20.5",
     "typescript": "4.9.4",
     "@linkurious/rest-client": "^4.1.0",
-    "@typescript-eslint/eslint-plugin": "7.14.1",
     "acorn": "8.8.1",
-    "esbuild": "0.16.17",
-    "eslint": "8.56.0",
-    "eslint-config-prettier": "9.1.0",
-    "eslint-plugin-import": "2.29.1",
-    "eslint-plugin-prettier": "5.1.3"
+    "esbuild": "0.16.17"
   }
 }
