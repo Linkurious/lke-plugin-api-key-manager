@@ -1,0 +1,8 @@
+{
+  "name": "@linkurious/lke-plugin-api-key-manager-dev",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch server.ts"
+  }
+}
