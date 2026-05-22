@@ -22,7 +22,7 @@
     "@types/superagent": "4.1.13",
     "tsx": "^4.20.5",
     "typescript": "4.9.4",
-    "@linkurious/rest-client": "^4.1.0",
+    "@linkurious/rest-client": "4.3.5",
     "acorn": "8.8.1",
     "esbuild": "0.16.17"
   }
