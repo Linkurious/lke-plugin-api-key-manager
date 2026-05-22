@@ -1,9 +1,8 @@
-import {
-  ApiRight,
-  RestClient,
+import { ApiRight, RestClient } from "@linkurious/rest-client";
+import type {
   ICreateApplicationParams,
   IUpdateApplicationParams,
-} from "@linkurious/rest-client";
+} from "@linkurious/rest-client/dist/src/api/application";
 import { parseLinkuriousAPI } from "@lke-plugin/backend/shared";
 
 import * as helper from "./helper";

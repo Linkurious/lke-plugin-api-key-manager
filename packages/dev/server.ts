@@ -1,7 +1,8 @@
 import fs from "fs";
 import path from "path";
 
-import { RestClient, PluginRouteOptions } from "@linkurious/rest-client";
+import { RestClient } from "@linkurious/rest-client";
+import type { PluginRouteOptions } from "@linkurious/rest-client/dist/src/api/plugin";
 import { CookieAccessInfo } from "cookiejar";
 import * as dotenv from "dotenv";
 import express from "express";
