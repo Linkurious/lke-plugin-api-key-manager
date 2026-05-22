@@ -45,6 +45,7 @@ type ApplicationItem = {
   id: number;
   name: string;
   enabled: boolean;
+  apiKey: string;
   groups: GroupItem[];
   rights: string[] | RightsMap;
 };
@@ -129,11 +130,18 @@ function toApplications(value: unknown): ApplicationItem[] {
     const id = asNumber(item.id);
     const name = asString(item.name);
     const enabled = asBoolean(item.enabled);
-    if (id !== undefined && name !== undefined && enabled !== undefined) {
+    const apiKey = asString(item.apiKey);
+    if (
+      id !== undefined &&
+      name !== undefined &&
+      enabled !== undefined &&
+      apiKey !== undefined
+    ) {
       output.push({
         id: id,
         name: name,
         enabled: enabled,
+        apiKey: apiKey,
         groups: toGroups(item.groups),
         rights: toActionList(item.rights),
       });
@@ -261,7 +269,6 @@ export = async function configureRoute(
             }
             return a.name.localeCompare(b.name);
           });
-
           return res.json(applications);
         },
       );
@@ -352,7 +359,6 @@ export = async function configureRoute(
           groups: groups.map((g) => ({ name: g.name, id: g.id })),
         });
       }
-      console.log(result);
       res.json(result);
     }),
   );
