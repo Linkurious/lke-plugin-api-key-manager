@@ -148,41 +148,46 @@ app.listen(LOCAL_PORT, async () => {
   );
 
   try {
-    const agent = superagent.agent();
+    const authAgent = superagent.agent();
 
     if (lkeSessionCookie) {
-      agent.jar.setCookie(
+      authAgent.jar.setCookie(
         `linkurious.session=${lkeSessionCookie}`,
         LOCAL_URL.hostname,
         "/",
       );
     }
 
-    const restClient: RestClient = new RestClient({
-      baseUrl: `http://localhost:${LOCAL_PORT}`,
-      agent: agent,
-    });
+    if (!lkeSessionCookie && process.env.LKE_USER && process.env.LKE_PASS) {
+      await authAgent
+        .post(new URL("/api/auth/login", LOCAL_URL).toString())
+        .send({
+          usernameOrEmail: process.env.LKE_USER,
+          password: process.env.LKE_PASS,
+        });
+    }
 
-    const user =
-      !lkeSessionCookie && process.env.LKE_USER && process.env.LKE_PASS
-        ? await parseLinkuriousAPI(
-            restClient.auth.login({
-              usernameOrEmail: process.env.LKE_USER,
-              password: process.env.LKE_PASS,
-            }),
-          )
-        : await parseLinkuriousAPI(restClient.auth.getCurrentUser());
-    console.info(
-      `Connected with user #${user.id} ${user.username} (${user.email})`,
-    );
-
-    const cookie = agent.jar.getCookie(
+    const cookie = authAgent.jar.getCookie(
       "linkurious.session",
       new CookieAccessInfo(LOCAL_URL.hostname, "/", false, false),
     );
     if (cookie && cookie.value !== lkeSessionCookie) {
       lkeSessionCookie = cookie.value;
     }
+
+    const restClientHeaders: [field: string, value: string][] = lkeSessionCookie
+      ? [["Cookie", `linkurious.session=${lkeSessionCookie}`]]
+      : [];
+
+    const restClient: RestClient = new RestClient({
+      baseUrl: `http://localhost:${LOCAL_PORT}`,
+      headers: restClientHeaders,
+    });
+
+    const user = await parseLinkuriousAPI(restClient.auth.getCurrentUser());
+    console.info(
+      `Connected with user #${user.id} ${user.username} (${user.email})`,
+    );
 
     console.debug("Session cookie", JSON.stringify(lkeSessionCookie));
 
