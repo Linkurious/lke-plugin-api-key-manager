@@ -7,7 +7,6 @@
     "build": "tsc -b",
     "lint": "eslint --fix ."
   },
-  "bundledDependencies": true,
   "dependencies": {
     "cookiejar": "2.1.4",
     "dotenv": "17.2.2",
