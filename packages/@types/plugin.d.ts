@@ -1,4 +1,4 @@
-import type { PluginConfig as PluginConfigBase } from "@linkurious/rest-client/dist/src/api/plugin";
+import type { PluginConfig as PluginConfigBase } from "@linkurious/rest-client";
 
 export interface PluginConfig extends PluginConfigBase {
   //no additional parameters required
