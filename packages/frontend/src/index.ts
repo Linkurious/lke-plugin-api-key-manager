@@ -2,7 +2,7 @@ import { ApiRight, RestClient } from "@linkurious/rest-client";
 import type {
   ICreateApplicationParams,
   IUpdateApplicationParams,
-} from "@linkurious/rest-client/dist/src/api/application";
+} from "@linkurious/rest-client";
 import { parseLinkuriousAPI } from "@lke-plugin/backend/shared";
 
 import * as helper from "./helper";

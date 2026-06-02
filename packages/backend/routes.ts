@@ -1,7 +1,7 @@
 import * as express from "express";
 import type { PluginRouteOptions } from "@linkurious/rest-client";
 
-import { PluginConfig } from "../@types/plugin";
+import type { PluginConfig } from "../@types/plugin";
 
 import { loggerFormatter, parseLinkuriousAPI } from "./shared";
 import { PluginError, UnauthorizedPluginError } from "./exceptions";

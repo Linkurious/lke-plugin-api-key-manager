@@ -4,5 +4,21 @@
   "private": true,
   "scripts": {
     "dev": "tsx watch server.ts"
+  },
+  "dependencies": {
+    "cookiejar": "2.1.4",
+    "dotenv": "17.2.2",
+    "express": "4.22.2",
+    "http-proxy-middleware": "3.0.5",
+    "superagent": "10.2.3"
+  },
+  "devDependencies": {
+    "@linkurious/rest-client": "4.3.5",
+    "@types/cookiejar": "2.1.5",
+    "@types/express": "4.17.3",
+    "@types/node": "24.1.0",
+    "@types/superagent": "4.1.13",
+    "tsx": "4.20.5",
+    "typescript": "4.9.4"
   }
 }

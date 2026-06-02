@@ -4,7 +4,7 @@ import path from "path";
 import { RestClient } from "@linkurious/rest-client";
 import type { PluginRouteOptions } from "@linkurious/rest-client/dist/src/api/plugin";
 import { CookieAccessInfo } from "cookiejar";
-import * as dotenv from "dotenv";
+import { config as loadDotenv } from "dotenv";
 import express from "express";
 import { createProxyMiddleware } from "http-proxy-middleware";
 import superagent from "superagent";
@@ -14,7 +14,7 @@ import { Manifest, PluginConfig } from "../@types/plugin";
 import routeHandler from "../backend/routes";
 import { parseLinkuriousAPI } from "../backend/shared";
 
-dotenv.config();
+loadDotenv();
 
 const LKE_URL = new URL(process.env.LKE_URL || "http://localhost:3000");
 const LOCAL_URL = new URL(process.env.LOCAL_URL || "http://localhost:4000");
