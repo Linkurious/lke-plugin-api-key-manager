@@ -409,7 +409,7 @@ async function fillKeyForm(keyId: number) {
   const enabled = document.getElementById("enableKey") as HTMLInputElement;
   currentKey.enabled ? (enabled.checked = true) : (enabled.checked = false);
 
-  const currentRights: RightsMap = currentKey.rights || [];
+  const currentRights: RightsMap = currentKey.rights || {};
 
   const rightsContainer = document.getElementById(
     "accessRightsContainer",
