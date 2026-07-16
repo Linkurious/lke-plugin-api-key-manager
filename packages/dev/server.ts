@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 
 import { RestClient } from "@linkurious/rest-client";
+import type { PluginConfig as IPluginConfig } from "@linkurious/rest-client";
 import type { PluginRouteOptions } from "@linkurious/rest-client/dist/src/api/plugin";
 import { CookieAccessInfo } from "cookiejar";
 import { config as loadDotenv } from "dotenv";
@@ -10,7 +11,7 @@ import { createProxyMiddleware } from "http-proxy-middleware";
 import superagent from "superagent";
 
 // Aggiorna il percorso del file @types/plugin
-import { Manifest, PluginConfig } from "../@types/plugin";
+import { Manifest } from "../@types/plugin";
 import routeHandler from "../backend/routes";
 import { parseLinkuriousAPI } from "../backend/shared";
 
@@ -27,12 +28,12 @@ const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8")) as Manifest;
 console.info("Manifest", JSON.stringify(manifest), "\n");
 
 // Aggiorna il percorso del file plugin-config.json
-let config: PluginConfig = {
+let config: IPluginConfig = {
   basePath: `${manifest.name}`,
 };
 try {
   const configPath = path.resolve(__dirname, "../../plugin-config.json");
-  config = JSON.parse(fs.readFileSync(configPath, "utf8")) as PluginConfig;
+  config = JSON.parse(fs.readFileSync(configPath, "utf8")) as IPluginConfig;
 } catch (e) {
   console.warn("No plugin-config.json found, using default configuration");
 }
@@ -191,7 +192,7 @@ app.listen(LOCAL_PORT, async () => {
 
     console.debug("Session cookie", JSON.stringify(lkeSessionCookie));
 
-    const options: PluginRouteOptions<PluginConfig> = {
+    const options: PluginRouteOptions<IPluginConfig> = {
       router: apiRouter,
       configuration: config,
       getRestClient: () => {
