@@ -201,7 +201,7 @@ app.listen(LOCAL_PORT, async () => {
     };
 
     // TODO: call the handler for all the `backendFiles` of the manifest
-    await routeHandler(options);
+    routeHandler(options);
   } catch (err) {
     console.error("Error during initialization:", err);
     console.info("Server terminated!");
