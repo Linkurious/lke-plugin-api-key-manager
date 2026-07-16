@@ -10,7 +10,8 @@
     "jsx": "react-jsx"
   },
   "include": [
-    "**/*.ts"
+    "**/*.ts",
+    "src/index.ts"
   ],
   "exclude": [
     "../backend/**/*.ts",
