@@ -1,4 +1,4 @@
-import express = require('express');
+import express = require("express");
 
 import type { PluginRouteOptions } from "../@types/plugin";
 
@@ -174,22 +174,22 @@ export = function configureRoutes(options: PluginRouteOptions): void {
        * Check Securities or other custom code which should be executed for every call
        */
       await parseLinkuriousAPI(restClient.auth.getCurrentUser(), (body) => {
-        if (!body.groups.find((g) => g.name === 'admin')) {
-          throw new UnauthorizedPluginError(['admin']);
+        if (!body.groups.find((g) => g.name === "admin")) {
+          throw new UnauthorizedPluginError(["admin"]);
         }
       });
       next();
-    })
+    }),
   );
 
   options.parentProcess?.postMetadata({
     actions: [
       {
-        name: 'Manage webhooks',
+        name: "Manage Application Keys",
         urlTemplate: `/`,
-        access: 'admin'
-      }
-    ]
+        access: "admin",
+      },
+    ],
   });
 
   /**
@@ -354,15 +354,17 @@ function respond(
   promiseFunction: (
     req: express.Request,
     res: express.Response,
-    next: express.NextFunction
-  ) => Promise<void> | void
+    next: express.NextFunction,
+  ) => Promise<void> | void,
 ): express.RequestHandler {
   return (req, res, next) => {
     Promise.resolve(promiseFunction(req, res, next)).catch((e) => {
       if (e instanceof PluginError) {
-        res.status(e.getHttpResponseCode()).json({error: e.name, message: e.message});
+        res
+          .status(e.getHttpResponseCode())
+          .json({ error: e.name, message: e.message });
       } else if (e instanceof Error) {
-        res.status(500).json({error: e.name, message: e.message});
+        res.status(500).json({ error: e.name, message: e.message });
       } else {
         res.status(500).json(JSON.stringify(e));
       }
@@ -396,5 +398,4 @@ function groupActions(actionList: string[]): RightsMap {
 
     return acc;
   }, {} as RightsMap);
-
 }
