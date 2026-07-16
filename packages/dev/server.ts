@@ -10,7 +10,7 @@ import express from "express";
 import { createProxyMiddleware } from "http-proxy-middleware";
 import superagent from "superagent";
 
-// Aggiorna il percorso del file @types/plugin
+// Update the path for the @types/plugin file
 import { Manifest } from "../@types/plugin";
 import routeHandler from "../backend/routes";
 import { parseLinkuriousAPI } from "../backend/shared";
@@ -22,12 +22,12 @@ const LOCAL_URL = new URL(process.env.LOCAL_URL || "http://localhost:4000");
 const LOCAL_PORT =
   +LOCAL_URL.port || { "http:": 80, "https:": 443 }[LOCAL_URL.protocol] || -1;
 
-// Aggiorna il percorso del file manifest.json
+// Update the path for the manifest.json file
 const manifestPath = path.resolve(__dirname, "../../manifest.json");
 const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8")) as Manifest;
 console.info("Manifest", JSON.stringify(manifest), "\n");
 
-// Aggiorna il percorso del file plugin-config.json
+// Update the path for the plugin-config.json file
 let config: IPluginConfig = {
   basePath: `${manifest.name}`,
 };
@@ -60,7 +60,7 @@ function escapeRegex(string: string) {
 // Handle singlePageAppIndex and patch the base tag of any html file
 app.use(`${PLUGIN_BASE_PATH}/api`, apiRouter);
 if (manifest.publicRoute) {
-  // Aggiorna il percorso della publicRoute
+  // Update the path for publicRoute
   const publicRoute = path.resolve(
     __dirname,
     "../../packages/frontend/",
