@@ -12,7 +12,8 @@ module.exports = {
   'parserOptions': {
     'ecmaVersion': 'ESNext',
     'sourceType': 'module',
-    'project': ['tsconfig.json', 'packages/*/tsconfig.json'],
+    'tsconfigRootDir': __dirname,
+    'project': ['tsconfig.base.json', 'packages/*/tsconfig.json'],
     'ecmaFeatures': {
       'jsx': true
     }
@@ -63,6 +64,7 @@ module.exports = {
     {
       'files': ['packages/frontend/src/**/*.{ts,tsx}'],
       'parserOptions': {
+        'tsconfigRootDir': __dirname,
         'project': ['packages/frontend/tsconfig.json']
       }
     }

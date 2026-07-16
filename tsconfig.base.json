@@ -31,11 +31,5 @@
     "noImplicitReturns": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false
-  },
-  "include": [
-    "packages/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  }
 }

@@ -2,5 +2,11 @@
   "name": "@linkurious/lke-plugin-api-key-manager-types",
   "version": "1.0.0",
   "private": true,
+  "scripts": {
+    "prelint": "echo 'No type-check for @types workspace'",
+    "prelint:ci": "echo 'No type-check for @types workspace'",
+    "lint": "echo 'No lint rules for @types workspace'",
+    "lint:ci": "echo 'No lint rules for @types workspace'"
+  },
   "types": "plugin.d.ts"
 }
