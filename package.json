@@ -25,7 +25,6 @@
     "clean": "npm run clean --workspace=@linkurious/lke-plugin-api-key-manager-frontend && rm -rf *.tgz *.lke",
     "lint": "npm run --workspaces lint",
     "lint:ci": "npm run --workspaces lint:ci",
-    "//lint:ci": "eslint -f checkstyle -o reports/checkstyle.xml . --ext .ts,.tsx && npm run tsc && npx tsc -p packages/frontend/tsconfig.json --noEmit",
     "tsc": "tsc -b tsconfig.base.json",
     "frontend": "npm run build --workspace=@linkurious/lke-plugin-api-key-manager-frontend",
     "prebuild": "rm -rf ./dist && rm -rf node_modules && npm install --workspaces --omit=dev && mkdir -p ./dist ./dist/backend && cp -R ./node_modules ./dist/node_modules && cp -R ./packages/backend/ ./dist/backend/node_modules && npm install --workspaces",
