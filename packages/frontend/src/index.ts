@@ -3,7 +3,8 @@ import type {
   ICreateApplicationParams,
   IUpdateApplicationParams,
 } from "@linkurious/rest-client";
-import { parseLinkuriousAPI } from "@lke-plugin/backend/shared";
+
+import { parseLinkuriousAPI } from "../../shared";
 
 import * as helper from "./helper";
 

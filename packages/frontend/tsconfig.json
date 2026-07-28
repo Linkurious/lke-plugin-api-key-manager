@@ -1,18 +1,13 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "../../dist",
-    "rootDir": "./",
-    "module": "commonjs",
-    "target": "ESNext",
-    "moduleResolution": "node",
+    "outDir": "./dist",
+    "rootDir": "../",
     "lib": ["DOM", "ESNext"],
     "jsx": "react-jsx"
   },
   "include": [
-    "./src/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules"
+    "./",
+    "../shared"
   ]
 }

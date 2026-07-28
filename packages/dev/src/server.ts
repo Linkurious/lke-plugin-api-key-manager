@@ -3,17 +3,15 @@ import path from "path";
 
 import { RestClient } from "@linkurious/rest-client";
 import type { PluginConfig as IPluginConfig } from "@linkurious/rest-client";
-import type { PluginRouteOptions } from "@linkurious/rest-client/dist/src/api/plugin";
 import { CookieAccessInfo } from "cookiejar";
 import { config as loadDotenv } from "dotenv";
 import express from "express";
 import { createProxyMiddleware } from "http-proxy-middleware";
 import superagent from "superagent";
+import routeHandler from "backend/src/routes";
 
-// Update the path for the @types/plugin file
-import { Manifest } from "../@types/plugin";
-import routeHandler from "../backend/routes";
-import { parseLinkuriousAPI } from "../backend/shared";
+import type { PluginRouteOptions, Manifest } from "../../shared";
+import { parseLinkuriousAPI } from "../../shared";
 
 loadDotenv();
 
@@ -23,7 +21,7 @@ const LOCAL_PORT =
   +LOCAL_URL.port || { "http:": 80, "https:": 443 }[LOCAL_URL.protocol] || -1;
 
 // Update the path for the manifest.json file
-const manifestPath = path.resolve(__dirname, "../../manifest.json");
+const manifestPath = path.resolve(__dirname, "../../../manifest.json");
 const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8")) as Manifest;
 console.info("Manifest", JSON.stringify(manifest), "\n");
 
@@ -32,7 +30,7 @@ let config: IPluginConfig = {
   basePath: `${manifest.name}`,
 };
 try {
-  const configPath = path.resolve(__dirname, "../../plugin-config.json");
+  const configPath = path.resolve(__dirname, "../../../plugin-config.json");
   config = JSON.parse(fs.readFileSync(configPath, "utf8")) as IPluginConfig;
 } catch (e) {
   console.warn("No plugin-config.json found, using default configuration");
@@ -61,10 +59,10 @@ function escapeRegex(string: string) {
 app.use(`${PLUGIN_BASE_PATH}/api`, apiRouter);
 if (manifest.publicRoute) {
   // Update the path for publicRoute
+  // In dev mode, serve from packages/frontend/public (esbuild watch output)
   const publicRoute = path.resolve(
     __dirname,
-    "../../packages/frontend/",
-    manifest.publicRoute,
+    "../../../packages/frontend/public",
   );
 
   // Inject base path on all htm / html pages
@@ -192,7 +190,7 @@ app.listen(LOCAL_PORT, async () => {
 
     console.debug("Session cookie", JSON.stringify(lkeSessionCookie));
 
-    const options: PluginRouteOptions<IPluginConfig> = {
+    const options: PluginRouteOptions = {
       router: apiRouter,
       configuration: config,
       getRestClient: () => {

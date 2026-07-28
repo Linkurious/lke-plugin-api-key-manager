@@ -1,8 +1,9 @@
-import express = require("express");
+import bodyParser from "body-parser";
+import type express from "express";
 
-import type { PluginRouteOptions } from "../@types/plugin";
+import type { PluginRouteOptions } from "../../shared";
+import { loggerFormatter, parseLinkuriousAPI } from "../../shared";
 
-import { loggerFormatter, parseLinkuriousAPI } from "./shared";
 import { PluginError, UnauthorizedPluginError } from "./exceptions";
 
 type RightsMap = {
@@ -165,7 +166,7 @@ export = function configureRoutes(options: PluginRouteOptions): void {
   console.error = loggerFormatter(console.error);
   console.debug = loggerFormatter(console.debug);
 
-  options.router.use(express.json());
+  options.router.use(bodyParser.json());
 
   options.router.use(
     respond(async (req, res, next) => {
@@ -399,3 +400,5 @@ function groupActions(actionList: string[]): RightsMap {
     return acc;
   }, {} as RightsMap);
 }
+
+console.log("API Key Plugin: routes module configured");

@@ -1,18 +1,14 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "../../dist/dev",
-    "rootDir": "..",
-    "module": "CommonJS",
-    "target": "ESNext",
-    "esModuleInterop": true,
-    "resolveJsonModule": true
+    "outDir": "./dist",
+    "rootDir": "./src"
   },
-  "include": [
-    "./**/*.ts",
-    "../backend/**/*.ts"
+  "references": [
+    { "path": "../backend" }
   ],
-  "exclude": [
-    "node_modules"
+  "include": [
+    "./",
+    "../shared"
   ]
 }
