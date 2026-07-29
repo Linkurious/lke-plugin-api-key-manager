@@ -9,7 +9,6 @@
     "build": "esbuild src/*.ts --bundle --outdir=../../dist/public/bundles --target=es6 --platform=browser --sourcemap --minify && cp -r public/ ../../dist/public/",
     "prelint": "tsc --noEmit",
     "lint": "eslint --fix src --ext .ts",
-    "prelint:ci": "tsc --noEmit",
     "lint:ci": "eslint -f checkstyle -o reports/checkstyle.xml ./src --ext .ts"
   },
   "devDependencies": {
