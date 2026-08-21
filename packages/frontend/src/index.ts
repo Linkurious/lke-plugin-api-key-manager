@@ -2,8 +2,9 @@ import { ApiRight, RestClient } from "@linkurious/rest-client";
 import type {
   ICreateApplicationParams,
   IUpdateApplicationParams,
-} from "@linkurious/rest-client/dist/src/api/application";
-import { parseLinkuriousAPI } from "@lke-plugin/backend/shared";
+} from "@linkurious/rest-client";
+
+import { parseLinkuriousAPI } from "../../shared";
 
 import * as helper from "./helper";
 
@@ -409,7 +410,7 @@ async function fillKeyForm(keyId: number) {
   const enabled = document.getElementById("enableKey") as HTMLInputElement;
   currentKey.enabled ? (enabled.checked = true) : (enabled.checked = false);
 
-  const currentRights: RightsMap = currentKey.rights || [];
+  const currentRights: RightsMap = currentKey.rights ?? {};
 
   const rightsContainer = document.getElementById(
     "accessRightsContainer",

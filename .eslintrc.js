@@ -12,7 +12,11 @@ module.exports = {
   'parserOptions': {
     'ecmaVersion': 'ESNext',
     'sourceType': 'module',
-    'project': ['tsconfig.json']
+    'tsconfigRootDir': __dirname,
+    'project': ['tsconfig.base.json', 'packages/*/tsconfig.json'],
+    'ecmaFeatures': {
+      'jsx': true
+    }
   },
   'rules': {
     'eqeqeq': ['error'], // Requires === or !== in place of == or !=
@@ -42,7 +46,7 @@ module.exports = {
     'require-atomic-updates': ['warn'],
 
     // TODO to investigate if to promote to errors
-    '@typescript-eslint/no-unsafe-assignment': ['warn'],
+    '@typescript-eslint/no-unsafe-assignment': ['error'],
     '@typescript-eslint/no-unsafe-member-access': ['warn'],
     '@typescript-eslint/no-unsafe-call': ['warn'],
     '@typescript-eslint/no-misused-promises': ['warn'],
@@ -55,5 +59,14 @@ module.exports = {
     // TODO remove both from downgraded to warnings
     '@typescript-eslint/no-explicit-any': ['warn'],
     '@typescript-eslint/no-var-requires': ['warn']
-  }
+  },
+  'overrides': [
+    {
+      'files': ['packages/frontend/src/**/*.{ts,tsx}'],
+      'parserOptions': {
+        'tsconfigRootDir': __dirname,
+        'project': ['packages/frontend/tsconfig.json']
+      }
+    }
+  ]
 };

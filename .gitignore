@@ -129,16 +129,10 @@ dist
 
 # LKE Plugins
 *.lke
-*.cookie
-.npmrc
-/backend
-/debug
-/frontend
 packages/frontend/public/bundles
 
 *.private.*
 builds/
 
 # Development
-/dev
 /tmp

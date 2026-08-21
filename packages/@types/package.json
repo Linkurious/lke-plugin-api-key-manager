@@ -1,6 +1,0 @@
-{
-  "name": "@linkurious/lke-plugin-api-key-manager-types",
-  "version": "1.0.0",
-  "private": true,
-  "types": "plugin.d.ts"
-}

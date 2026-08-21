@@ -2,10 +2,11 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "../",
-    "lib": ["DOM", "ESNext"],
-    "jsx": "react-jsx"
+    "rootDir": "../"
   },
+  "references": [
+    { "path": "../backend" }
+  ],
   "include": [
     "./",
     "../shared"

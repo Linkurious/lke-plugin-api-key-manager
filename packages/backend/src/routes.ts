@@ -1,9 +1,9 @@
-import * as express from "express";
-import type { PluginRouteOptions } from "@linkurious/rest-client";
+import bodyParser from "body-parser";
+import type express from "express";
 
-import { PluginConfig } from "../@types/plugin";
+import type { PluginRouteOptions } from "../../shared";
+import { loggerFormatter, parseLinkuriousAPI } from "../../shared";
 
-import { loggerFormatter, parseLinkuriousAPI } from "./shared";
 import { PluginError, UnauthorizedPluginError } from "./exceptions";
 
 type RightsMap = {
@@ -159,41 +159,14 @@ function toActionList(value: unknown): string[] {
 
 console.log("Routes module loaded");
 
-export = async function configureRoute(
-  options: PluginRouteOptions<PluginConfig> & { serverRootFolder?: string },
-): Promise<void> {
-  console.log("Configuring routes...");
-
+export = function configureRoutes(options: PluginRouteOptions): void {
   console.log = loggerFormatter(console.log);
   console.warn = loggerFormatter(console.warn);
   console.info = loggerFormatter(console.info);
   console.error = loggerFormatter(console.error);
   console.debug = loggerFormatter(console.debug);
 
-  options.router.use(express.json());
-  console.log("JSON body parser configured");
-
-  function respond(
-    promiseFunction: (
-      req: express.Request,
-      res: express.Response,
-      next: express.NextFunction,
-    ) => Promise<void> | void,
-  ): express.RequestHandler {
-    return (req, res, next) => {
-      Promise.resolve(promiseFunction(req, res, next)).catch((e) => {
-        if (e instanceof PluginError) {
-          res
-            .status(e.getHttpResponseCode())
-            .json({ error: e.name, message: e.message });
-        } else if (e instanceof Error) {
-          res.status(500).json({ error: e.name, message: e.message });
-        } else {
-          res.status(500).json(JSON.stringify(e));
-        }
-      });
-    };
-  }
+  options.router.use(bodyParser.json());
 
   options.router.use(
     respond(async (req, res, next) => {
@@ -209,6 +182,16 @@ export = async function configureRoute(
       next();
     }),
   );
+
+  options.parentProcess?.postMetadata({
+    actions: [
+      {
+        name: "Manage Application Keys",
+        urlTemplate: `/`,
+        access: "admin",
+      },
+    ],
+  });
 
   /**
    * Validate the user access rights
@@ -368,6 +351,28 @@ export = async function configureRoute(
   console.log("Routes loaded");
 };
 
+function respond(
+  promiseFunction: (
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction,
+  ) => Promise<void> | void,
+): express.RequestHandler {
+  return (req, res, next) => {
+    Promise.resolve(promiseFunction(req, res, next)).catch((e) => {
+      if (e instanceof PluginError) {
+        res
+          .status(e.getHttpResponseCode())
+          .json({ error: e.name, message: e.message });
+      } else if (e instanceof Error) {
+        res.status(500).json({ error: e.name, message: e.message });
+      } else {
+        res.status(500).json(JSON.stringify(e));
+      }
+    });
+  };
+}
+
 function groupActions(actionList: string[]): RightsMap {
   return actionList.reduce((acc, currentAction) => {
     const parts = currentAction.split(".");
@@ -395,3 +400,5 @@ function groupActions(actionList: string[]): RightsMap {
     return acc;
   }, {} as RightsMap);
 }
+
+console.log("API Key Plugin: routes module configured");
