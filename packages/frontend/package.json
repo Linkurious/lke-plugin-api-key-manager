@@ -6,7 +6,7 @@
     "predev": "rm -rf public/bundles",
     "dev": "esbuild src/*.ts --bundle --outdir=public/bundles --target=es6 --platform=browser --sourcemap --watch",
     "prebuild": "rm -rf public/bundles",
-    "build": "esbuild src/*.ts --bundle --outdir=../../dist/public/bundles --target=es6 --platform=browser --sourcemap --minify && cp -r public/ ../../dist/public/",
+    "build": "esbuild src/*.ts --bundle --outdir=../../dist/public/bundles --target=es6 --platform=browser --sourcemap --minify && cp -r public ../../dist",
     "prelint": "tsc --noEmit",
     "lint": "eslint --fix src --ext .ts",
     "prelint:ci": "tsc --noEmit",
