@@ -13,6 +13,6 @@
     "lint:ci": "eslint -f checkstyle -o reports/checkstyle.xml ./src --ext .ts"
   },
   "devDependencies": {
-    "esbuild": "0.28.1"
+    "esbuild": "0.28.2"
   }
 }
