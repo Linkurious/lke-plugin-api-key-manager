@@ -11,7 +11,7 @@
   "dependencies": {
     "backend": "file:../backend",
     "cookiejar": "2.1.4",
-    "dotenv": "17.2.2",
+    "dotenv": "17.4.2",
     "http-proxy-middleware": "3.0.7",
     "superagent": "10.2.3"
   },
