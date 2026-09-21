@@ -12,6 +12,18 @@
     "ja": {
       "title": "アプリケーションキー マネージャー",
       "description": "Linkurious Enterpriseでアプリケーションキーの作成と変更を行います。"
+    },
+    "it": {
+      "title": "Gestore delle chiavi applicative",
+      "description": "Crea e modifica le chiavi applicative in Linkurious Enterprise."
+    },
+    "es": {
+      "title": "Administrador de claves de aplicación",
+      "description": "Crea y modifica claves de aplicación en Linkurious Enterprise."
+    },
+    "ar": {
+      "title": "مدير مفاتيح التطبيق",
+      "description": "أنشئ مفاتيح التطبيق وعدّلها في Linkurious Enterprise."
     }
   }
 }
