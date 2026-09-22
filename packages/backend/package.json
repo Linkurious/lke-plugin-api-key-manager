@@ -1,0 +1,19 @@
+{
+  "name": "backend",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "clean": "rm -rf node_modules reports tmp tsconfig.tsbuildinfo",
+    "build": "tsc",
+    "prelint": "tsc --noEmit",
+    "lint": "eslint --fix .",
+    "lint:ci": "eslint -f checkstyle -o reports/checkstyle.xml ./src --ext .ts"
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+    "@types/express": "4.17.3",
+    "@types/node": "24.12.0"
+  }
+}

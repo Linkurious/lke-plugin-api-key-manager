@@ -1,0 +1,18 @@
+{
+  "name": "frontend",
+  "private": true,
+  "scripts": {
+    "clean": "rm -rf public/bundles node_modules reports tmp tsconfig.tsbuildinfo",
+    "predev": "rm -rf public/bundles",
+    "dev": "esbuild src/*.ts --bundle --outdir=public/bundles --target=es6 --platform=browser --sourcemap --watch",
+    "prebuild": "rm -rf public/bundles",
+    "build": "esbuild src/*.ts --bundle --outdir=../../dist/public/bundles --target=es6 --platform=browser --sourcemap --minify && cp -r public ../../dist",
+    "prelint": "tsc --noEmit",
+    "lint": "eslint --fix src --ext .ts",
+    "prelint:ci": "tsc --noEmit",
+    "lint:ci": "eslint -f checkstyle -o reports/checkstyle.xml ./src --ext .ts"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.1"
+  }
+}

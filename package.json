@@ -1,0 +1,63 @@
+{
+  "name": "@linkurious/lke-plugin-api-key-manager",
+  "version": "1.0.0",
+  "description": "API Key Manager for Linkurious Enterprise",
+  "homepage": "https://github.com/Linkurious/lke-plugin-api-key-manager#readme",
+  "bugs": {
+    "url": "https://github.com/Linkurious/lke-plugin-api-key-manager/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Linkurious/lke-plugin-api-key-manager.git"
+  },
+  "engines": {
+    "node": "24.14.1"
+  },
+  "author": "Linkurious",
+  "private": true,
+  "workspaces": [
+    "packages/backend",
+    "packages/frontend",
+    "packages/dev"
+  ],
+  "files": [
+    "manifest*.json",
+    "LICENSE",
+    "dist"
+  ],
+  "scripts": {
+    "clean": "npm run clean --workspaces && rm -rf *.tgz *.lke tmp node_modules dist",
+    "lint": "npm run --workspaces lint",
+    "lint:ci": "npm run --workspaces lint:ci",
+    "npm-package-name": "echo ${npm_package_name}-${npm_package_version}.tgz | sed -e 's/@//' -e 's/\\//-/'",
+    "plugin-name": "echo ${npm_package_name} | sed -e 's/^@.*\\///' -e s/^lke-plugin-//",
+    "artifact-name": "echo lke-plugin-$(npm run --silent plugin-name).lke",
+    "build": "npm run build --workspaces --if-present",
+    "postbuild": "mkdir -p tmp/github_release && npm pack && mv $(npm run --silent npm-package-name) $(npm run --silent artifact-name) && ln -sf $(pwd)/$(npm run --silent artifact-name) $(pwd)/tmp/github_release/lke-plugin-$(npm run --silent plugin-name)-v$(cat .version).lke",
+    "manual-upload": "gh release create \"v$(cat .version)\" $(npm run --silent artifact-name)",
+    "bump:patch": "bump2version patch && npm version --no-git-tag-version patch",
+    "bump:minor": "bump2version minor && npm version --no-git-tag-version minor",
+    "bump:major": "bump2version major && npm version --no-git-tag-version major",
+    "dev:backend": "npm run dev --workspace=backend",
+    "dev:devserver": "npm run dev --workspace=dev",
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "dev": "npm-run-all --parallel dev:devserver dev:frontend"
+  },
+  "license": "Apache 2",
+  "bundleDependencies": true,
+  "dependencies": {
+    "body-parser": "2.3.0"
+  },
+  "devDependencies": {
+    "@linkurious/rest-client": "4.3.5",
+    "@typescript-eslint/eslint-plugin": "7.14.1",
+    "eslint": "8.56.0",
+    "eslint-config-prettier": "9.1.0",
+    "eslint-plugin-import": "2.29.1",
+    "eslint-plugin-prettier": "5.1.3",
+    "eslint-plugin-workspaces": "0.12.1",
+    "npm-run-all": "4.1.5",
+    "typescript": "5.5.2",
+    "tsx": "4.20.5"
+  }
+}
