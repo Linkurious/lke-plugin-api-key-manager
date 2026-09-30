@@ -2,9 +2,9 @@
   "name": "api-key-manager",
   "version": "1.0.0",
   "pluginApiVersion": "1.0.0",
-  "publicRoute": "public",
+  "publicRoute": "dist/public",
   "singlePageAppIndex": "index.html",
   "backendFiles": [
-    "backend/routes.js"
+    "dist/backend/src/routes.js"
   ]
 }

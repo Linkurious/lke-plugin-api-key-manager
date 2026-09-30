@@ -36,7 +36,7 @@ table {
   border-radius: 1em;
   overflow: hidden;
   width: 95%;
-  box-shadow: 3px 6px rgb(230, 230, 230);
+  box-shadow: 3px 6px rgb(230, 230, 230), 0 0 0 1px rgb(230, 230, 230);
   margin-left: auto;
   margin-right: auto;
 }
@@ -182,7 +182,7 @@ input {
 }
 
 .addButton {
-  background-image: url(assets/add-icon.svg);
+  background-image: url(add-icon.svg);
   background-size: contain;
   background-size: 1em;
   background-position: 18px;

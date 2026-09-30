@@ -2,37 +2,36 @@ import fs from "fs";
 import path from "path";
 
 import { RestClient } from "@linkurious/rest-client";
-import type { PluginRouteOptions } from "@linkurious/rest-client/dist/src/api/plugin";
+import type { PluginConfig as IPluginConfig } from "@linkurious/rest-client";
 import { CookieAccessInfo } from "cookiejar";
-import * as dotenv from "dotenv";
+import { config as loadDotenv } from "dotenv";
 import express from "express";
 import { createProxyMiddleware } from "http-proxy-middleware";
 import superagent from "superagent";
+import routeHandler from "backend/src/routes";
 
-// Aggiorna il percorso del file @types/plugin
-import { Manifest, PluginConfig } from "../@types/plugin";
-import routeHandler from "../backend/routes";
-import { parseLinkuriousAPI } from "../backend/shared";
+import type { PluginRouteOptions, Manifest } from "../../shared";
+import { parseLinkuriousAPI } from "../../shared";
 
-dotenv.config();
+loadDotenv();
 
 const LKE_URL = new URL(process.env.LKE_URL || "http://localhost:3000");
 const LOCAL_URL = new URL(process.env.LOCAL_URL || "http://localhost:4000");
 const LOCAL_PORT =
   +LOCAL_URL.port || { "http:": 80, "https:": 443 }[LOCAL_URL.protocol] || -1;
 
-// Aggiorna il percorso del file manifest.json
-const manifestPath = path.resolve(__dirname, "../../manifest.json");
+// Update the path for the manifest.json file
+const manifestPath = path.resolve(__dirname, "../../../manifest.json");
 const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8")) as Manifest;
 console.info("Manifest", JSON.stringify(manifest), "\n");
 
-// Aggiorna il percorso del file plugin-config.json
-let config: PluginConfig = {
+// Update the path for the plugin-config.json file
+let config: IPluginConfig = {
   basePath: `${manifest.name}`,
 };
 try {
-  const configPath = path.resolve(__dirname, "../../plugin-config.json");
-  config = JSON.parse(fs.readFileSync(configPath, "utf8")) as PluginConfig;
+  const configPath = path.resolve(__dirname, "../../../plugin-config.json");
+  config = JSON.parse(fs.readFileSync(configPath, "utf8")) as IPluginConfig;
 } catch (e) {
   console.warn("No plugin-config.json found, using default configuration");
 }
@@ -59,11 +58,11 @@ function escapeRegex(string: string) {
 // Handle singlePageAppIndex and patch the base tag of any html file
 app.use(`${PLUGIN_BASE_PATH}/api`, apiRouter);
 if (manifest.publicRoute) {
-  // Aggiorna il percorso della publicRoute
+  // Update the path for publicRoute
+  // In dev mode, serve from packages/frontend/public (esbuild watch output)
   const publicRoute = path.resolve(
     __dirname,
-    "../../packages/frontend/",
-    manifest.publicRoute,
+    "../../../packages/frontend/public",
   );
 
   // Inject base path on all htm / html pages
@@ -148,35 +147,26 @@ app.listen(LOCAL_PORT, async () => {
   );
 
   try {
-    const agent = superagent.agent();
+    const authAgent = superagent.agent();
 
     if (lkeSessionCookie) {
-      agent.jar.setCookie(
+      authAgent.jar.setCookie(
         `linkurious.session=${lkeSessionCookie}`,
         LOCAL_URL.hostname,
         "/",
       );
     }
 
-    const restClient: RestClient = new RestClient({
-      baseUrl: `http://localhost:${LOCAL_PORT}`,
-      agent: agent,
-    });
+    if (!lkeSessionCookie && process.env.LKE_USER && process.env.LKE_PASS) {
+      await authAgent
+        .post(new URL("/api/auth/login", LOCAL_URL).toString())
+        .send({
+          usernameOrEmail: process.env.LKE_USER,
+          password: process.env.LKE_PASS,
+        });
+    }
 
-    const user =
-      !lkeSessionCookie && process.env.LKE_USER && process.env.LKE_PASS
-        ? await parseLinkuriousAPI(
-            restClient.auth.login({
-              usernameOrEmail: process.env.LKE_USER,
-              password: process.env.LKE_PASS,
-            }),
-          )
-        : await parseLinkuriousAPI(restClient.auth.getCurrentUser());
-    console.info(
-      `Connected with user #${user.id} ${user.username} (${user.email})`,
-    );
-
-    const cookie = agent.jar.getCookie(
+    const cookie = authAgent.jar.getCookie(
       "linkurious.session",
       new CookieAccessInfo(LOCAL_URL.hostname, "/", false, false),
     );
@@ -184,9 +174,23 @@ app.listen(LOCAL_PORT, async () => {
       lkeSessionCookie = cookie.value;
     }
 
+    const restClientHeaders: [field: string, value: string][] = lkeSessionCookie
+      ? [["Cookie", `linkurious.session=${lkeSessionCookie}`]]
+      : [];
+
+    const restClient: RestClient = new RestClient({
+      baseUrl: `http://localhost:${LOCAL_PORT}`,
+      headers: restClientHeaders,
+    });
+
+    const user = await parseLinkuriousAPI(restClient.auth.getCurrentUser());
+    console.info(
+      `Connected with user #${user.id} ${user.username} (${user.email})`,
+    );
+
     console.debug("Session cookie", JSON.stringify(lkeSessionCookie));
 
-    const options: PluginRouteOptions<PluginConfig> = {
+    const options: PluginRouteOptions = {
       router: apiRouter,
       configuration: config,
       getRestClient: () => {
@@ -195,7 +199,7 @@ app.listen(LOCAL_PORT, async () => {
     };
 
     // TODO: call the handler for all the `backendFiles` of the manifest
-    await routeHandler(options);
+    routeHandler(options);
   } catch (err) {
     console.error("Error during initialization:", err);
     console.info("Server terminated!");

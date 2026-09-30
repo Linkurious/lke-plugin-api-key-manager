@@ -1,19 +1,18 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
-    "moduleResolution": "node",
-    "module": "CommonJS",
+    "composite": true,
+    "moduleResolution": "nodenext",
+    "module": "nodenext",
     "target": "ESNext",
-    "outDir": ".",
     "esModuleInterop": true,
     "lib": [
-      "DOM",
       "ESNext"
     ],
     "sourceMap": true,
     "inlineSourceMap": false,
     "inlineSources": true,
-    "declaration": false,
+    "declaration": true,
     "removeComments": true,
     /* Strict Checks */
     "strict": true,
@@ -32,9 +31,6 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false
   },
-  "include": [
-    "packages/**/*.ts"
-  ],
   "exclude": [
     "node_modules"
   ]
