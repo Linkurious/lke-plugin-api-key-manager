@@ -4,9 +4,6 @@
     "outDir": "./dist",
     "rootDir": "../"
   },
-  "references": [
-    { "path": "../backend" }
-  ],
   "include": [
     "./",
     "../shared"
