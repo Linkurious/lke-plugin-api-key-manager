@@ -1,8 +1,8 @@
-import { ApiRight, RestClient } from "@linkurious/rest-client";
 import type {
   ICreateApplicationParams,
   IUpdateApplicationParams,
 } from "@linkurious/rest-client";
+import { ApiRight, RestClient } from "@linkurious/rest-client";
 
 import { parseLinkuriousAPI } from "../../shared";
 
@@ -59,6 +59,7 @@ type ApplicationItem = {
 };
 
 let groupsMap: GroupsMap;
+let unrenderedRights: ApiRight[] = [];
 
 function closePopup(this: HTMLDivElement) {
   this.closest(".popin")?.classList.remove("show");
@@ -268,6 +269,7 @@ async function showFullpagePopup(mode = "create", blockApp = false) {
 }
 
 async function resetKeyForm() {
+  unrenderedRights = [];
   const form = document.getElementById("addKeyForm") as HTMLFormElement;
   form.setAttribute("mode", "create");
   form.removeAttribute("key-id");
@@ -426,14 +428,25 @@ async function fillKeyForm(keyId: number) {
       currentRights[right].actions.length === 0
     ) {
       // Only one right without sub-actions, select the parent right
-      const parentCheckbox = document.getElementById(right) as HTMLInputElement;
-      parentCheckbox.click();
+      const parentCheckbox = document.getElementById(
+        right,
+      ) as HTMLInputElement | null;
+      if (parentCheckbox) {
+        parentCheckbox.click();
+      } else {
+        unrenderedRights.push(right as ApiRight);
+      }
     } else {
       for (const action of currentRights[right].actions) {
+        const actionRight = `${right}.${action}`;
         const actionCheckbox = document.getElementById(
-          `${right}.${action}`,
-        ) as HTMLInputElement;
-        actionCheckbox.click();
+          actionRight,
+        ) as HTMLInputElement | null;
+        if (actionCheckbox) {
+          actionCheckbox.click();
+        } else {
+          unrenderedRights.push(actionRight as ApiRight);
+        }
       }
     }
   }
@@ -835,7 +848,7 @@ function getSelectedAccessRights(): ApiRight[] {
   const container = document.getElementById(
     "accessRightsContainer",
   ) as HTMLDivElement;
-  const selected: ApiRight[] = [];
+  const selected: ApiRight[] = [...unrenderedRights];
 
   container.querySelectorAll(".tree-group").forEach((groupLi) => {
     const groupCheckbox = groupLi.querySelector(
