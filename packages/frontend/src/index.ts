@@ -694,9 +694,7 @@ function generateAccessRightsForm() {
 
   const data = groupActions(
     Object.values(ApiRight)
-      .filter(
-        (value) => typeof value === "string" && !value.startsWith("admin"),
-      )
+      .filter((value) => typeof value === "string")
       .sort(),
   );
 
