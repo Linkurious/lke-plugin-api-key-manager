@@ -1,16 +1,20 @@
 import fs from "fs";
 import path from "path";
 
+import type {
+  PluginConfig as IPluginConfig,
+  PluginConfig,
+  PluginRouteOptions,
+} from "@linkurious/rest-client";
 import { RestClient } from "@linkurious/rest-client";
-import type { PluginConfig as IPluginConfig } from "@linkurious/rest-client";
+import routeHandler from "backend/src/routes";
 import { CookieAccessInfo } from "cookiejar";
 import { config as loadDotenv } from "dotenv";
 import express from "express";
 import { createProxyMiddleware } from "http-proxy-middleware";
 import superagent from "superagent";
-import routeHandler from "backend/src/routes";
 
-import type { PluginRouteOptions, Manifest } from "../../shared";
+import type { Manifest } from "../../shared";
 import { parseLinkuriousAPI } from "../../shared";
 
 loadDotenv();
@@ -190,11 +194,14 @@ app.listen(LOCAL_PORT, async () => {
 
     console.debug("Session cookie", JSON.stringify(lkeSessionCookie));
 
-    const options: PluginRouteOptions = {
+    const options: PluginRouteOptions<PluginConfig> = {
       router: apiRouter,
       configuration: config,
       getRestClient: () => {
         return restClient;
+      },
+      parentProcess: {
+        postMetadata: function () {},
       },
     };
 
