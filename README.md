@@ -16,7 +16,7 @@
   
 # Compatibility
 
-This plugin is compatible with Linkurious Enterprise starting from v4.3.0.
+This plugin is compatible with Linkurious Enterprise starting from v4.3.13.
 
 # Configurations
 

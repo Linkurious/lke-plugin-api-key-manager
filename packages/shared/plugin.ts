@@ -1,23 +1,6 @@
-import {PluginConfig, PluginRouteOptions as PluginRouteOptionsBase} from '@linkurious/rest-client';
+import { PluginConfig as PluginConfigBase } from "@linkurious/rest-client";
 
-export interface PluginRouteOptions extends PluginRouteOptionsBase<PluginConfig> {
-  parentProcess?: PluginParentProcess;
-}
-
-export interface PluginParentProcess {
-  postMetadata(metadata: PluginMetadata): void;
-}
-
-export interface PluginMetadata {
-  actions: PluginAction[];
-}
-
-export interface PluginAction {
-  name: string;
-  urlTemplate: string;
-  sourceKey?: string;
-  access: 'admin' | '*';
-}
+export interface PluginConfig extends PluginConfigBase {}
 
 export interface Manifest {
   name: string;
