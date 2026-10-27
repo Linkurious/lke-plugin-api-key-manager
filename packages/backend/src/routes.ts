@@ -1,8 +1,12 @@
+import type { PluginRouteOptions } from "@linkurious/rest-client";
 import bodyParser from "body-parser";
 import type express from "express";
 
-import type { PluginRouteOptions } from "../../shared";
-import { loggerFormatter, parseLinkuriousAPI } from "../../shared";
+import {
+  loggerFormatter,
+  parseLinkuriousAPI,
+  PluginConfig,
+} from "../../shared";
 
 import { PluginError, UnauthorizedPluginError } from "./exceptions";
 
@@ -159,7 +163,9 @@ function toActionList(value: unknown): string[] {
 
 console.log("Routes module loaded");
 
-export = function configureRoutes(options: PluginRouteOptions): void {
+export = function configureRoutes(
+  options: PluginRouteOptions<PluginConfig>,
+): void {
   console.log = loggerFormatter(console.log);
   console.warn = loggerFormatter(console.warn);
   console.info = loggerFormatter(console.info);
