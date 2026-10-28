@@ -1,6 +1,6 @@
 {
   "name": "api-key-manager",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "pluginApiVersion": "1.0.0",
   "publicRoute": "dist/public",
   "singlePageAppIndex": "index.html",
