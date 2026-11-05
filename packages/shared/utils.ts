@@ -1,4 +1,18 @@
 import type * as LKE from "@linkurious/rest-client";
+import { LkErrorKey } from "@linkurious/rest-client";
+
+export function deleteApplication(restClient: LKE.RestClient, id: number) {
+  return restClient.application.request({
+    errors: [
+      LkErrorKey.UNAUTHORIZED,
+      LkErrorKey.FORBIDDEN,
+      LkErrorKey.NOT_FOUND,
+    ],
+    url: "/admin/applications/:id",
+    method: "DELETE",
+    params: { id },
+  });
+}
 
 /*
  * parseLinkuriousAPI

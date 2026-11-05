@@ -4,7 +4,7 @@ import type {
 } from "@linkurious/rest-client";
 import { ApiRight, RestClient } from "@linkurious/rest-client";
 
-import { parseLinkuriousAPI } from "../../shared";
+import { deleteApplication, parseLinkuriousAPI } from "../../shared";
 
 import * as helper from "./helper";
 
@@ -53,13 +53,15 @@ type ApplicationItem = {
   id: number;
   name: string;
   enabled: boolean;
-  apiKey: string;
+  apiKey?: string;
+  hint?: string;
   groups?: ApplicationGroup[];
   rights?: ApplicationRightsMap;
 };
 
 let groupsMap: GroupsMap;
 let unrenderedRights: ApiRight[] = [];
+let applicationToDeleteId: number | undefined;
 
 function closePopup(this: HTMLDivElement) {
   this.closest(".popin")?.classList.remove("show");
@@ -124,7 +126,7 @@ function addKey() {
 
             await parseLinkuriousAPI(
               window.restClient.application.createApplication(body),
-              async () => {
+              async (application) => {
                 errorBox.classList.remove("show");
                 errorTitle.textContent = "";
                 errorMessage.textContent = "";
@@ -138,7 +140,10 @@ function addKey() {
                 // closing the formPopup
                 closePopup.call(name.parentElement as HTMLDivElement);
 
-                void helper.showPopin("info", "API Key created successfully");
+                void helper.showPopin(
+                  "info",
+                  `API Key created successfully. Save it now; it won't be shown again:\n${application.apiKey}`,
+                );
               },
               async (e) => {
                 errorBox.classList.add("show");
@@ -539,8 +544,12 @@ async function refreshKeysTable() {
       // apiKey
       let apiKey = document.createElement("td");
       apiKey.style.whiteSpace = "nowrap";
-      apiKey.textContent = key.apiKey;
-      apiKey = maskKey(apiKey);
+      if (key.apiKey) {
+        apiKey.textContent = key.apiKey;
+        apiKey = maskKey(apiKey);
+      } else {
+        apiKey.textContent = key.hint ? `****${key.hint}` : "Unavailable";
+      }
       tr.append(apiKey);
 
       // state
@@ -564,6 +573,15 @@ async function refreshKeysTable() {
       });
       actions.append(updateButton);
 
+      const deleteButton = document.createElement("button");
+      deleteButton.classList.add("button", "red");
+      deleteButton.textContent = "Delete";
+      deleteButton.addEventListener("click", () => {
+        applicationToDeleteId = key.id;
+        document.getElementById("confirmPopin")?.classList.add("show");
+      });
+      actions.append(deleteButton);
+
       tr.append(actions);
 
       tbody.appendChild(tr);
@@ -586,6 +604,39 @@ async function init() {
       );
     document.getElementById("addGroup")?.addEventListener("click", addGroup);
     document.getElementById("addApiKey")?.addEventListener("click", addKey);
+    document
+      .querySelector("#confirmPopin .confirmButton")
+      ?.addEventListener("click", () => {
+        const id = applicationToDeleteId;
+        applicationToDeleteId = undefined;
+        const confirmPopin = document.getElementById(
+          "confirmPopin",
+        ) as HTMLDivElement;
+        closePopup.call(confirmPopin);
+
+        if (id === undefined) {
+          return;
+        }
+
+        void helper.runLongTask(
+          null,
+          async () => {
+            try {
+              await parseLinkuriousAPI(
+                deleteApplication(window.restClient, id),
+              );
+              await refreshKeysTable();
+              void helper.showPopin("info", "API Key deleted successfully");
+            } catch (e) {
+              void helper.showPopin(
+                "error",
+                e instanceof Error ? e.message : JSON.stringify(e),
+              );
+            }
+          },
+          { defaultErrorHandler: false },
+        );
+      });
     await refreshKeysTable();
     await loadGroupList();
     generateAccessRightsForm();
