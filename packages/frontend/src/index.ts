@@ -59,12 +59,72 @@ type ApplicationItem = {
   rights?: ApplicationRightsMap;
 };
 
+const API_KEY_LENGTH = 32;
+
 let groupsMap: GroupsMap;
 let unrenderedRights: ApiRight[] = [];
 let applicationToDeleteId: number | undefined;
 
 function closePopup(this: HTMLDivElement) {
   this.closest(".popin")?.classList.remove("show");
+}
+
+function showCreatedApplicationKey(apiKey: string) {
+  void helper.showPopin("info", "", false, "API Key created successfully");
+
+  const message = document.querySelector("#popin .popinMessage");
+  const messageText = document.createElement("p");
+  messageText.append("Copy the code below and save it securely.");
+  messageText.appendChild(document.createElement("br"));
+  const importantText = document.createElement("strong");
+  importantText.textContent =
+    "Important: This code will only be displayed once and cannot be retrieved later.";
+  messageText.appendChild(importantText);
+  message?.replaceChildren(messageText);
+
+  const closeButton = document.querySelector("#popin .close");
+  const copyWarning = document.createElement("p");
+  copyWarning.className = "copy-required-error";
+  copyWarning.setAttribute("role", "alert");
+  copyWarning.textContent = "Copy the API key before closing this window.";
+
+  let hasCopiedKey = false;
+  const preventCloseBeforeCopy = (event: Event) => {
+    if (hasCopiedKey) {
+      return;
+    }
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    copyWarning.classList.add("show");
+  };
+  closeButton?.addEventListener("click", preventCloseBeforeCopy, true);
+
+  const keyContainer = document.createElement("div");
+  keyContainer.className = "created-key-container";
+  keyContainer.appendChild(
+    createMaskedKeyButton(apiKey, () => {
+      hasCopiedKey = true;
+      copyWarning.classList.remove("show");
+      closeButton?.removeEventListener("click", preventCloseBeforeCopy, true);
+    }),
+  );
+  message?.appendChild(keyContainer);
+  message?.appendChild(copyWarning);
+}
+
+function createMaskedKeyButton(
+  apiKey: string,
+  onCopied: () => void,
+): HTMLButtonElement {
+  const copyButton = document.createElement("button");
+  copyButton.type = "button";
+  copyButton.classList.add("button", "created-key-button");
+  copyButton.textContent = apiKey;
+  copyButton.title = "Copy API key";
+  copyButton.setAttribute("aria-label", "Copy newly created API key");
+  maskKey(copyButton, onCopied);
+
+  return copyButton;
 }
 
 function addKey() {
@@ -140,10 +200,7 @@ function addKey() {
                 // closing the formPopup
                 closePopup.call(name.parentElement as HTMLDivElement);
 
-                void helper.showPopin(
-                  "info",
-                  `API Key created successfully. Save it now; it won't be shown again:\n${application.apiKey}`,
-                );
+                showCreatedApplicationKey(application.apiKey);
               },
               async (e) => {
                 errorBox.classList.add("show");
@@ -494,6 +551,53 @@ async function fillKeyForm(keyId: number) {
   void showFullpagePopup("update");
 }
 
+function createActionButton(
+  label: string,
+  iconName: "edit" | "delete",
+  onClick: () => void,
+): HTMLButtonElement {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "action-icon-button";
+  button.setAttribute("aria-label", label);
+
+  const icon = document.createElement("span");
+  icon.className = `action-icon action-icon-${iconName}`;
+  icon.setAttribute("aria-hidden", "true");
+  button.appendChild(icon);
+
+  const tooltip = document.createElement("span");
+  tooltip.className = "action-tooltip tooltip-light";
+  tooltip.textContent = label;
+  const showTooltip = () => {
+    const bounds = button.getBoundingClientRect();
+    document.body.appendChild(tooltip);
+    tooltip.classList.add("show");
+
+    const tooltipBounds = tooltip.getBoundingClientRect();
+    const gap = 8;
+    const aboveTop = bounds.top - tooltipBounds.height - gap;
+    const top = aboveTop >= 4 ? aboveTop : bounds.bottom + gap;
+    const minCenter = tooltipBounds.width / 2 + 4;
+    const maxCenter = window.innerWidth - tooltipBounds.width / 2 - 4;
+    const center = bounds.left + bounds.width / 2;
+
+    tooltip.style.left = `${Math.min(Math.max(center, minCenter), maxCenter)}px`;
+    tooltip.style.top = `${Math.min(
+      Math.max(top, 4),
+      window.innerHeight - tooltipBounds.height - 4,
+    )}px`;
+  };
+  const hideTooltip = () => tooltip.remove();
+  button.addEventListener("mouseenter", showTooltip);
+  button.addEventListener("mouseleave", hideTooltip);
+  button.addEventListener("focus", showTooltip);
+  button.addEventListener("blur", hideTooltip);
+  button.addEventListener("click", onClick);
+
+  return button;
+}
+
 // Keys Table
 async function refreshKeysTable() {
   await helper.runLongTask(null, async (updater) => {
@@ -512,7 +616,23 @@ async function refreshKeysTable() {
 
       // name
       const name = document.createElement("td");
-      name.textContent = key.name;
+      const isNameTruncated = key.name.length > 20;
+      if (isNameTruncated) {
+        const truncatedName = document.createElement("span");
+        truncatedName.className = "truncated-name";
+        truncatedName.textContent = `${key.name.slice(0, 20)}...`;
+        truncatedName.tabIndex = 0;
+        truncatedName.setAttribute("aria-label", key.name);
+
+        const tooltip = document.createElement("span");
+        tooltip.className = "name-tooltip tooltip-light";
+        tooltip.textContent = key.name;
+        tooltip.setAttribute("role", "tooltip");
+        truncatedName.appendChild(tooltip);
+        name.appendChild(truncatedName);
+      } else {
+        name.textContent = key.name;
+      }
       tr.append(name);
 
       // groups
@@ -546,9 +666,11 @@ async function refreshKeysTable() {
       apiKey.style.whiteSpace = "nowrap";
       if (key.apiKey) {
         apiKey.textContent = key.apiKey;
-        apiKey = maskKey(apiKey);
+        apiKey = maskTableKey(apiKey);
       } else {
-        apiKey.textContent = key.hint ? `****${key.hint}` : "Unavailable";
+        apiKey.textContent = key.hint
+          ? `${"*".repeat(Math.max(0, API_KEY_LENGTH - key.hint.length))}${key.hint}`
+          : "Unavailable";
       }
       tr.append(apiKey);
 
@@ -564,23 +686,13 @@ async function refreshKeysTable() {
       // actions
       const actions = document.createElement("td");
 
-      // --> Update
-      const updateButton = document.createElement("button");
-      updateButton.classList.add("button", "secondary");
-      updateButton.textContent = "Update";
-      updateButton.addEventListener("click", () => {
-        void fillKeyForm(key.id);
-      });
-      actions.append(updateButton);
-
-      const deleteButton = document.createElement("button");
-      deleteButton.classList.add("button", "red");
-      deleteButton.textContent = "Delete";
-      deleteButton.addEventListener("click", () => {
-        applicationToDeleteId = key.id;
-        document.getElementById("confirmPopin")?.classList.add("show");
-      });
-      actions.append(deleteButton);
+      actions.append(
+        createActionButton("Update", "edit", () => void fillKeyForm(key.id)),
+        createActionButton("Delete", "delete", () => {
+          applicationToDeleteId = key.id;
+          document.getElementById("confirmPopin")?.classList.add("show");
+        }),
+      );
 
       tr.append(actions);
 
@@ -643,7 +755,11 @@ async function init() {
   });
 }
 
-function maskKey(cell: HTMLTableCellElement): HTMLTableCellElement {
+function maskKey(
+  cell: HTMLElement,
+  onCopied?: () => void,
+  tooltipTheme: "light" | "dark" = "light",
+): HTMLElement {
   const key = cell.textContent || "";
 
   cell.textContent = "";
@@ -656,29 +772,52 @@ function maskKey(cell: HTMLTableCellElement): HTMLTableCellElement {
   container.style.cursor = "pointer";
   container.style.position = "relative";
 
-  // Tooltip/extra content element
+  // Copy feedback element
   const tooltip = document.createElement("span");
-  tooltip.className = "tooltip";
+  tooltip.className = `copy-feedback tooltip-${tooltipTheme}`;
   tooltip.textContent = "Copied!";
-  tooltip.style.display = "none";
+  tooltip.setAttribute("aria-live", "polite");
 
   container.onclick = async () => {
-    await navigator.clipboard.writeText(key);
-    container.title = "Copied";
-    // Show the extra content above the span
-    tooltip.style.display = "";
-    tooltip.style.opacity = "0.8";
-    setTimeout(() => {
+    try {
+      await navigator.clipboard.writeText(key);
+      onCopied?.();
+      container.title = "Copied";
+      tooltip.textContent = "Copied!";
+    } catch {
+      tooltip.textContent = "Copy failed";
+    }
+    tooltip.classList.add("show");
+    window.setTimeout(() => {
       container.title = "Copy";
-      tooltip.style.display = "none";
-      tooltip.style.opacity = "0";
-    }, 1000);
+      tooltip.classList.remove("show");
+    }, 1200);
   };
 
   container.textContent = masked;
   container.title = "Copy";
   container.appendChild(tooltip);
   cell.appendChild(container);
+
+  return cell;
+}
+
+function maskTableKey(cell: HTMLTableCellElement): HTMLTableCellElement {
+  const key = cell.textContent || "";
+  maskKey(cell, undefined);
+
+  const container = cell.querySelector(".masked-key");
+  const tooltip = container?.querySelector(".copy-feedback");
+  if (container) {
+    const visibleLength = Math.min(5, Math.ceil(key.length / 2));
+    container.textContent =
+      key.slice(0, visibleLength) +
+      "*".repeat(key.length - visibleLength * 2) +
+      key.slice(-visibleLength);
+    if (tooltip) {
+      container.appendChild(tooltip);
+    }
+  }
 
   return cell;
 }
@@ -702,9 +841,38 @@ function createBadge(
 
   if (extraContent !== null && extraContent.length > 0) {
     const extraDiv = document.createElement("div");
-    extraDiv.className = "extra-content";
+    extraDiv.className = "extra-content-tooltip tooltip-light";
     extraDiv.textContent = extraContent;
+    extraDiv.style.fontSize = window.getComputedStyle(badge).fontSize;
+    extraDiv.setAttribute("role", "tooltip");
     badge.appendChild(extraDiv);
+
+    badge.tabIndex = 0;
+    badge.setAttribute("aria-label", `${name} ${number}: ${extraContent}`);
+    const showTooltip = () => {
+      const bounds = badge.getBoundingClientRect();
+      document.body.appendChild(extraDiv);
+      extraDiv.classList.add("show");
+
+      const tooltipBounds = extraDiv.getBoundingClientRect();
+      const gap = 8;
+      const aboveTop = bounds.top - tooltipBounds.height - gap;
+      const top = aboveTop >= 4 ? aboveTop : bounds.bottom + gap;
+      const minCenter = tooltipBounds.width / 2 + 4;
+      const maxCenter = window.innerWidth - tooltipBounds.width / 2 - 4;
+      const center = bounds.left + bounds.width / 2;
+
+      extraDiv.style.left = `${Math.min(Math.max(center, minCenter), maxCenter)}px`;
+      extraDiv.style.top = `${Math.min(
+        Math.max(top, 4),
+        window.innerHeight - tooltipBounds.height - 4,
+      )}px`;
+    };
+    const hideTooltip = () => extraDiv.remove();
+    badge.addEventListener("mouseenter", showTooltip);
+    badge.addEventListener("mouseleave", hideTooltip);
+    badge.addEventListener("focus", showTooltip);
+    badge.addEventListener("blur", hideTooltip);
   }
   return badge;
 }
