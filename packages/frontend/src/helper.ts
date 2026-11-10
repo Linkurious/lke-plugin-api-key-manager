@@ -129,6 +129,7 @@ export function showPopin(
   style: "info" | "error",
   message: string,
   hideApp = false,
+  title?: string,
 ) {
   return new Promise((resolve, reject) => {
     if (popinResolvers) {
@@ -144,7 +145,8 @@ export function showPopin(
       ".popinMessage",
     ) as HTMLParagraphElement;
 
-    titleElement.textContent = style === "info" ? "Information" : "Error";
+    titleElement.textContent =
+      title ?? (style === "info" ? "Information" : "Error");
     messageElement.replaceChildren();
     for (const line of message.split("\n")) {
       const p = document.createElement("p");

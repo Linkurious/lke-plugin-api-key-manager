@@ -73,6 +73,92 @@ tbody tr td:last-child {
   white-space: nowrap;
 }
 
+tbody tr td:last-child .button + .button {
+  margin-left: 8px;
+}
+
+tbody tr td:last-child .action-icon-button + .action-icon-button {
+  margin-left: 8px;
+}
+
+.action-icon-button {
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #2c3e50;
+  cursor: pointer;
+  line-height: 0;
+  vertical-align: middle;
+}
+
+.action-icon-button:hover {
+  background: transparent;
+  color: #0062fa;
+}
+
+.action-icon-button:focus-visible {
+  outline: 2px solid #0062fa;
+  outline-offset: 1px;
+}
+
+.action-icon {
+  display: block;
+  width: 22px;
+  height: 22px;
+  background-color: currentColor;
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: contain;
+  -webkit-mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+}
+
+.action-icon-edit {
+  mask-image: url("edit-icon.svg");
+  -webkit-mask-image: url("edit-icon.svg");
+}
+
+.action-icon-delete {
+  mask-image: url("delete-icon.svg");
+  -webkit-mask-image: url("delete-icon.svg");
+}
+
+.action-tooltip {
+  position: fixed;
+  z-index: 10000;
+  bottom: auto;
+  left: auto;
+  display: block;
+  width: max-content;
+  height: auto;
+  min-height: 0;
+  font-family: "Haas Grot Text R Web", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  text-align: center;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateX(-50%);
+  transition: opacity 120ms;
+}
+
+.action-tooltip.show {
+  opacity: 1;
+  visibility: visible;
+}
+
 tbody tr.disabled {
   color: #a2a2a2
 }
@@ -221,6 +307,7 @@ input {
 .confirmButtons {
   margin-bottom: 10px;
   display: flex;
+  gap: 5px;
   justify-content: center;
 }
 
@@ -446,26 +533,33 @@ form select:focus {
   font-size: 0.8em;
 }
 
-.badge .extra-content {
-  display: none;
-  position: absolute;
-  top: -135%;
-  left: 50%;
-  transform: translateX(-50%);
-  margin-top: 6px;
-  background-color: #333;
-  color: white;
-  padding: 2px 10px;
-  border-radius: 8px;
+.extra-content-tooltip {
+  position: fixed;
+  z-index: 10000;
+  bottom: auto;
+  left: auto;
+  display: block;
+  width: max-content;
+  height: auto;
+  min-height: 0;
+  font-family: "Haas Grot Text R Web", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: inherit;
+  font-weight: 400;
+  line-height: normal;
+  text-align: center;
+  max-width: none;
   white-space: nowrap;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-  opacity: 90%;
-  font-size: 1em;
-  z-index: 10;
+  overflow-wrap: normal;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateX(-50%);
+  transition: opacity 120ms;
 }
 
-.badge:hover .extra-content {
-  display: block;
+.extra-content-tooltip.show {
+  opacity: 1;
+  visibility: visible;
 }
 
 button.collapse-toggle {
@@ -628,4 +722,154 @@ input:checked + .slider:before {
   -webkit-transform: translateX(16px);
   -ms-transform: translateX(16px);
   transform: translateX(16px);
+}
+
+.created-key-button {
+  background-color: #f1f3f4;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
+  color: #202124;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 32px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.created-key-button:hover {
+  background-color: #f8f9fa;
+  border-color: #dadce0;
+}
+
+.created-key-button:focus {
+  background-color: #f1f3f4;
+  color: #2c3e50;
+}
+
+.created-key-button .masked-key {
+  display: inline-block;
+  position: static;
+  padding-right: 0;
+  text-align: center;
+}
+
+.created-key-button .masked-key::after {
+  display: none;
+}
+
+.copy-feedback {
+  position: absolute;
+  z-index: 20;
+  bottom: calc(100% + 12px);
+  left: 50%;
+  font-family: "Haas Grot Text R Web", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  line-height: 16px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%);
+  transition: opacity 120ms;
+}
+
+.copy-feedback.show {
+  opacity: 1;
+}
+
+.truncated-name {
+  position: relative;
+  display: inline-block;
+  cursor: default;
+}
+
+.name-tooltip {
+  position: absolute;
+  z-index: 20;
+  bottom: calc(100% + 8px);
+  left: 0;
+  max-width: 320px;
+  font-family: "Haas Grot Text R Web", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: inherit;
+  line-height: inherit;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 120ms;
+}
+
+.truncated-name:hover .name-tooltip,
+.truncated-name:focus .name-tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+.tooltip-light {
+  padding: 4px 7px;
+  border: 1px solid #dadce0;
+  border-radius: 6px;
+  background-color: #FFFFFF;
+  box-shadow: 0 2px 5px rgb(60 64 67 / 25%);
+  color: #5f6368;
+}
+
+.tooltip-dark {
+  padding: 4px 7px;
+  border: 0;
+  border-radius: 8px;
+  background-color: rgba(51, 51, 51, 0.9);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  color: #FFFFFF;
+}
+
+.created-key-container {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.created-key-fallback {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 0 16px;
+}
+
+.created-key-fallback[hidden] {
+  display: none;
+}
+
+.created-key-fallback label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.created-key-fallback input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  padding: 8px;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
+  font-family: monospace;
+  user-select: all;
+}
+
+.created-key-fallback button {
+  align-self: center;
+}
+
+.copy-required-error {
+  color: #d32f2f;
+  text-align: center;
+  margin: 10px 0 0 0;
+  display: none;
+}
+
+.copy-required-error.show {
+  display: block;
+}
 }
