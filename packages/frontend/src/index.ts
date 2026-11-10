@@ -82,15 +82,17 @@ function showCreatedApplicationKey(apiKey: string) {
   messageText.appendChild(importantText);
   message?.replaceChildren(messageText);
 
-  const closeButton = document.querySelector("#popin .close");
+  const closeButton = document.querySelector(
+    "#popin .close",
+  ) as HTMLAnchorElement | null;
   const copyWarning = document.createElement("p");
   copyWarning.className = "copy-required-error";
   copyWarning.setAttribute("role", "alert");
   copyWarning.textContent = "Copy the API key before closing this window.";
 
-  let hasCopiedKey = false;
+  let hasSavedKey = false;
   const preventCloseBeforeCopy = (event: Event) => {
-    if (hasCopiedKey) {
+    if (hasSavedKey) {
       return;
     }
     event.preventDefault();
@@ -101,20 +103,58 @@ function showCreatedApplicationKey(apiKey: string) {
 
   const keyContainer = document.createElement("div");
   keyContainer.className = "created-key-container";
+  const fallbackContainer = document.createElement("div");
+  fallbackContainer.className = "created-key-fallback";
+  fallbackContainer.hidden = true;
+
+  const fallbackLabel = document.createElement("label");
+  fallbackLabel.textContent = "Select and save this API key:";
+  const fallbackKey = document.createElement("input");
+  fallbackKey.type = "text";
+  fallbackKey.readOnly = true;
+  fallbackKey.value = apiKey;
+  fallbackKey.setAttribute("aria-label", "Full API key");
+  fallbackKey.addEventListener("focus", () => fallbackKey.select());
+  fallbackLabel.appendChild(fallbackKey);
+
+  const acknowledgeButton = document.createElement("button");
+  acknowledgeButton.type = "button";
+  acknowledgeButton.className = "button";
+  acknowledgeButton.textContent = "I've saved the API key";
+  acknowledgeButton.addEventListener("click", () => {
+    hasSavedKey = true;
+    closeButton?.removeEventListener("click", preventCloseBeforeCopy, true);
+    closeButton?.click();
+  });
+  fallbackContainer.append(fallbackLabel, acknowledgeButton);
+
   keyContainer.appendChild(
-    createMaskedKeyButton(apiKey, () => {
-      hasCopiedKey = true;
-      copyWarning.classList.remove("show");
-      closeButton?.removeEventListener("click", preventCloseBeforeCopy, true);
-    }),
+    createMaskedKeyButton(
+      apiKey,
+      () => {
+        hasSavedKey = true;
+        copyWarning.classList.remove("show");
+        closeButton?.removeEventListener("click", preventCloseBeforeCopy, true);
+      },
+      () => {
+        copyWarning.textContent =
+          "Clipboard access failed. Select and save the full key below, then confirm.";
+        copyWarning.classList.add("show");
+        fallbackContainer.hidden = false;
+        fallbackKey.focus();
+        fallbackKey.select();
+      },
+    ),
   );
   message?.appendChild(keyContainer);
+  message?.appendChild(fallbackContainer);
   message?.appendChild(copyWarning);
 }
 
 function createMaskedKeyButton(
   apiKey: string,
   onCopied: () => void,
+  onCopyFailed: () => void,
 ): HTMLButtonElement {
   const copyButton = document.createElement("button");
   copyButton.type = "button";
@@ -122,7 +162,7 @@ function createMaskedKeyButton(
   copyButton.textContent = apiKey;
   copyButton.title = "Copy API key";
   copyButton.setAttribute("aria-label", "Copy newly created API key");
-  maskKey(copyButton, onCopied);
+  maskKey(copyButton, onCopied, "light", onCopyFailed);
 
   return copyButton;
 }
@@ -762,6 +802,7 @@ function maskKey(
   cell: HTMLElement,
   onCopied?: () => void,
   tooltipTheme: "light" | "dark" = "light",
+  onCopyFailed?: () => void,
 ): HTMLElement {
   const key = cell.textContent || "";
 
@@ -789,6 +830,7 @@ function maskKey(
       tooltip.textContent = "Copied!";
     } catch {
       tooltip.textContent = "Copy failed";
+      onCopyFailed?.();
     }
     tooltip.classList.add("show");
     window.setTimeout(() => {

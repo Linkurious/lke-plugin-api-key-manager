@@ -830,6 +830,38 @@ input:checked + .slider:before {
   margin: 20px 0;
 }
 
+.created-key-fallback {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 0 16px;
+}
+
+.created-key-fallback[hidden] {
+  display: none;
+}
+
+.created-key-fallback label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.created-key-fallback input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  padding: 8px;
+  border: 1px solid #dadce0;
+  border-radius: 4px;
+  font-family: monospace;
+  user-select: all;
+}
+
+.created-key-fallback button {
+  align-self: center;
+}
+
 .copy-required-error {
   color: #d32f2f;
   text-align: center;
