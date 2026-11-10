@@ -191,16 +191,15 @@ function addKey() {
                 errorTitle.textContent = "";
                 errorMessage.textContent = "";
 
-                // resetting the key table
-                const table = document.querySelector(
-                  "#keysTable tbody",
-                )! as HTMLTableElement;
-                table.innerHTML = "";
-                await refreshKeysTable();
                 // closing the formPopup
                 closePopup.call(name.parentElement as HTMLDivElement);
 
                 showCreatedApplicationKey(application.apiKey);
+                try {
+                  await refreshKeysTable({ defaultErrorHandler: false });
+                } catch (e) {
+                  console.error("Failed to refresh API keys table", e);
+                }
               },
               async (e) => {
                 errorBox.classList.add("show");
@@ -599,108 +598,112 @@ function createActionButton(
 }
 
 // Keys Table
-async function refreshKeysTable() {
-  await helper.runLongTask(null, async (updater) => {
-    updater.update("Reload API Keys...");
-    const response = await fetch(`api/keys`);
-    const keysList = (await response.json()) as ApplicationItem[];
+async function refreshKeysTable(options: helper.RunLongTaskOptions = {}) {
+  await helper.runLongTask(
+    null,
+    async (updater) => {
+      updater.update("Reload API Keys...");
+      const response = await fetch(`api/keys`);
+      const keysList = (await response.json()) as ApplicationItem[];
 
-    const table = document.querySelector(
-      "#keysTable tbody",
-    ) as HTMLTableElement;
-    const tbody = document.createElement("tbody");
+      const table = document.querySelector(
+        "#keysTable tbody",
+      ) as HTMLTableElement;
+      const tbody = document.createElement("tbody");
 
-    for (const key of keysList) {
-      const tr = document.createElement("tr");
-      tr.setAttribute("key-id", key.id.toString());
+      for (const key of keysList) {
+        const tr = document.createElement("tr");
+        tr.setAttribute("key-id", key.id.toString());
 
-      // name
-      const name = document.createElement("td");
-      const isNameTruncated = key.name.length > 20;
-      if (isNameTruncated) {
-        const truncatedName = document.createElement("span");
-        truncatedName.className = "truncated-name";
-        truncatedName.textContent = `${key.name.slice(0, 20)}...`;
-        truncatedName.tabIndex = 0;
-        truncatedName.setAttribute("aria-label", key.name);
+        // name
+        const name = document.createElement("td");
+        const isNameTruncated = key.name.length > 20;
+        if (isNameTruncated) {
+          const truncatedName = document.createElement("span");
+          truncatedName.className = "truncated-name";
+          truncatedName.textContent = `${key.name.slice(0, 20)}...`;
+          truncatedName.tabIndex = 0;
+          truncatedName.setAttribute("aria-label", key.name);
 
-        const tooltip = document.createElement("span");
-        tooltip.className = "name-tooltip tooltip-light";
-        tooltip.textContent = key.name;
-        tooltip.setAttribute("role", "tooltip");
-        truncatedName.appendChild(tooltip);
-        name.appendChild(truncatedName);
-      } else {
-        name.textContent = key.name;
-      }
-      tr.append(name);
-
-      // groups
-      const groups = document.createElement("td");
-      groups.style.whiteSpace = "nowrap";
-      let groupsRedacted = "";
-      if (key.groups !== undefined) {
-        for (const group of key.groups) {
-          groupsRedacted += `${group.name} [${group.sourceKey || "*"}]<br><hr>`;
+          const tooltip = document.createElement("span");
+          tooltip.className = "name-tooltip tooltip-light";
+          tooltip.textContent = key.name;
+          tooltip.setAttribute("role", "tooltip");
+          truncatedName.appendChild(tooltip);
+          name.appendChild(truncatedName);
+        } else {
+          name.textContent = key.name;
         }
-        groups.innerHTML = groupsRedacted.slice(0, -4);
-        tr.append(groups);
-      }
+        tr.append(name);
 
-      // rights
-      const rights = document.createElement("td");
-      if (key.rights !== undefined) {
-        for (const right in key.rights) {
-          const currentBadge = createBadge(
-            right,
-            key.rights[right].counter,
-            key.rights[right].actions.join(", "),
-          );
-          rights.append(currentBadge);
+        // groups
+        const groups = document.createElement("td");
+        groups.style.whiteSpace = "nowrap";
+        let groupsRedacted = "";
+        if (key.groups !== undefined) {
+          for (const group of key.groups) {
+            groupsRedacted += `${group.name} [${group.sourceKey || "*"}]<br><hr>`;
+          }
+          groups.innerHTML = groupsRedacted.slice(0, -4);
+          tr.append(groups);
         }
-        tr.append(rights);
+
+        // rights
+        const rights = document.createElement("td");
+        if (key.rights !== undefined) {
+          for (const right in key.rights) {
+            const currentBadge = createBadge(
+              right,
+              key.rights[right].counter,
+              key.rights[right].actions.join(", "),
+            );
+            rights.append(currentBadge);
+          }
+          tr.append(rights);
+        }
+
+        // apiKey
+        let apiKey = document.createElement("td");
+        apiKey.style.whiteSpace = "nowrap";
+        if (key.apiKey) {
+          apiKey.textContent = key.apiKey;
+          apiKey = maskTableKey(apiKey);
+        } else {
+          apiKey.textContent = key.hint
+            ? `${"*".repeat(Math.max(0, API_KEY_LENGTH - key.hint.length))}${key.hint}`
+            : "Unavailable";
+        }
+        tr.append(apiKey);
+
+        // state
+        const state = document.createElement("td");
+        if (key.enabled) {
+          state.innerHTML = "<span class='badge green'>Enabled</span>";
+        } else {
+          state.innerHTML = "<span class='badge red'>Disabled</span>";
+        }
+        tr.append(state);
+
+        // actions
+        const actions = document.createElement("td");
+
+        actions.append(
+          createActionButton("Update", "edit", () => void fillKeyForm(key.id)),
+          createActionButton("Delete", "delete", () => {
+            applicationToDeleteId = key.id;
+            document.getElementById("confirmPopin")?.classList.add("show");
+          }),
+        );
+
+        tr.append(actions);
+
+        tbody.appendChild(tr);
       }
 
-      // apiKey
-      let apiKey = document.createElement("td");
-      apiKey.style.whiteSpace = "nowrap";
-      if (key.apiKey) {
-        apiKey.textContent = key.apiKey;
-        apiKey = maskTableKey(apiKey);
-      } else {
-        apiKey.textContent = key.hint
-          ? `${"*".repeat(Math.max(0, API_KEY_LENGTH - key.hint.length))}${key.hint}`
-          : "Unavailable";
-      }
-      tr.append(apiKey);
-
-      // state
-      const state = document.createElement("td");
-      if (key.enabled) {
-        state.innerHTML = "<span class='badge green'>Enabled</span>";
-      } else {
-        state.innerHTML = "<span class='badge red'>Disabled</span>";
-      }
-      tr.append(state);
-
-      // actions
-      const actions = document.createElement("td");
-
-      actions.append(
-        createActionButton("Update", "edit", () => void fillKeyForm(key.id)),
-        createActionButton("Delete", "delete", () => {
-          applicationToDeleteId = key.id;
-          document.getElementById("confirmPopin")?.classList.add("show");
-        }),
-      );
-
-      tr.append(actions);
-
-      tbody.appendChild(tr);
-    }
-
-    table.replaceWith(tbody);
-  });
+      table.replaceWith(tbody);
+    },
+    options,
+  );
 }
 
 async function init() {
