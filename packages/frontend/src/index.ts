@@ -778,7 +778,7 @@ function maskKey(
   tooltip.textContent = "Copied!";
   tooltip.setAttribute("aria-live", "polite");
 
-  container.onclick = async () => {
+  cell.onclick = async () => {
     try {
       await navigator.clipboard.writeText(key);
       onCopied?.();
