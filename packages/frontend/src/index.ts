@@ -2,9 +2,9 @@ import type {
   ICreateApplicationParams,
   IUpdateApplicationParams,
 } from "@linkurious/rest-client";
-import { ApiRight, RestClient } from "@linkurious/rest-client";
+import { ApiRight, LkErrorKey, RestClient } from "@linkurious/rest-client";
 
-import { deleteApplication, parseLinkuriousAPI } from "../../shared";
+import { parseLinkuriousAPI } from "../../shared";
 
 import * as helper from "./helper";
 
@@ -64,6 +64,19 @@ const API_KEY_LENGTH = 32;
 let groupsMap: GroupsMap;
 let unrenderedRights: ApiRight[] = [];
 let applicationToDeleteId: number | undefined;
+
+function deleteApplication(id: number) {
+  return window.restClient.application.request({
+    errors: [
+      LkErrorKey.UNAUTHORIZED,
+      LkErrorKey.FORBIDDEN,
+      LkErrorKey.NOT_FOUND,
+    ],
+    url: "/admin/applications/:id",
+    method: "DELETE",
+    params: { id },
+  });
+}
 
 function closePopup(this: HTMLDivElement) {
   this.closest(".popin")?.classList.remove("show");
@@ -778,7 +791,7 @@ async function init() {
           async () => {
             try {
               await parseLinkuriousAPI(
-                deleteApplication(window.restClient, id),
+                deleteApplication(id),
               );
               await refreshKeysTable();
               void helper.showPopin("info", "API Key deleted successfully");
