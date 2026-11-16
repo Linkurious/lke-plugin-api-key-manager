@@ -872,4 +872,3 @@ input:checked + .slider:before {
 .copy-required-error.show {
   display: block;
 }
-}

@@ -74,7 +74,7 @@ function deleteApplication(id: number) {
     ],
     url: "/admin/applications/:id",
     method: "DELETE",
-    params: { id },
+    params: { id: id },
   });
 }
 
@@ -790,9 +790,7 @@ async function init() {
           null,
           async () => {
             try {
-              await parseLinkuriousAPI(
-                deleteApplication(id),
-              );
+              await parseLinkuriousAPI(deleteApplication(id));
               await refreshKeysTable();
               void helper.showPopin("info", "API Key deleted successfully");
             } catch (e) {
