@@ -48,7 +48,8 @@ type GroupItem = {
 type ApplicationItem = {
   id: number;
   name: string;
-  apiKey: string;
+  apiKey?: string;
+  hint?: string;
   enabled: boolean;
   groups: GroupItem[];
   rights: string[] | RightsMap;
@@ -134,17 +135,19 @@ function toApplications(value: unknown): ApplicationItem[] {
     const id = asNumber(item.id);
     const name = asString(item.name);
     const apiKey = asString(item.apiKey);
+    const hint = asString(item.hint);
     const enabled = asBoolean(item.enabled);
     if (
       id !== undefined &&
       name !== undefined &&
-      apiKey !== undefined &&
+      (apiKey !== undefined || hint !== undefined) &&
       enabled !== undefined
     ) {
       output.push({
         id: id,
         name: name,
         apiKey: apiKey,
+        hint: hint,
         enabled: enabled,
         groups: toGroups(item.groups),
         rights: toActionList(item.rights),

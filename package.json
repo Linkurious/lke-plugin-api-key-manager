@@ -1,6 +1,6 @@
 {
   "name": "@linkurious/lke-plugin-api-key-manager",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "API Key Manager for Linkurious Enterprise",
   "homepage": "https://github.com/Linkurious/lke-plugin-api-key-manager#readme",
   "bugs": {
@@ -11,7 +11,7 @@
     "url": "git+https://github.com/Linkurious/lke-plugin-api-key-manager.git"
   },
   "engines": {
-    "node": "24.22.1"
+    "node": "26.13.1"
   },
   "author": "Linkurious",
   "private": true,
@@ -35,9 +35,9 @@
     "build": "npm run build --workspaces --if-present",
     "postbuild": "mkdir -p tmp/github_release && npm pack && mv $(npm run --silent npm-package-name) $(npm run --silent artifact-name) && ln -sf $(pwd)/$(npm run --silent artifact-name) $(pwd)/tmp/github_release/lke-plugin-$(npm run --silent plugin-name)-v$(cat .version).lke",
     "manual-upload": "gh release create \"v$(cat .version)\" $(npm run --silent artifact-name)",
-    "bump:patch": "bump2version patch && npm version --no-git-tag-version patch",
-    "bump:minor": "bump2version minor && npm version --no-git-tag-version minor",
-    "bump:major": "bump2version major && npm version --no-git-tag-version major",
+    "bump:patch": "bump2version patch && npm version --no-git-tag-version patch --workspaces --include-workspace-root",
+    "bump:minor": "bump2version minor && npm version --no-git-tag-version minor --workspaces --include-workspace-root",
+    "bump:major": "bump2version major && npm version --no-git-tag-version major --workspaces --include-workspace-root",
     "dev:backend": "npm run dev --workspace=backend",
     "dev:devserver": "npm run dev --workspace=dev",
     "dev:frontend": "npm run dev --workspace=frontend",
@@ -49,7 +49,7 @@
     "body-parser": "2.3.0"
   },
   "devDependencies": {
-    "@linkurious/rest-client": "4.3.13",
+    "@linkurious/rest-client": "4.3.15",
     "@typescript-eslint/eslint-plugin": "7.14.1",
     "eslint": "8.56.0",
     "eslint-config-prettier": "9.1.0",
@@ -57,7 +57,7 @@
     "eslint-plugin-prettier": "5.1.3",
     "eslint-plugin-workspaces": "0.12.1",
     "npm-run-all": "4.1.5",
-    "typescript": "5.5.2",
+    "typescript": "5.9.3",
     "tsx": "4.20.5"
   },
   "allowScripts": {
